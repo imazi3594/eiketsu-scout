@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { BookOpen, Search, X } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Search, X } from "lucide-react";
 import {
   CARD_BY_ID,
   CARD_COUNT,
@@ -38,6 +38,7 @@ export function ScoutApp() {
   const [rarities, setRarities] = useState<string[]>([]);
   const [costs, setCosts] = useState<number[]>([]);
   const [moreFilters, setMoreFilters] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -78,14 +79,29 @@ export function ScoutApp() {
     .filter(Boolean)
     .join(" · ");
 
+  const clearFilters = () => {
+    setColors([]);
+    setCosts([]);
+    setUnits([]);
+    setPeriods([]);
+    setSkills([]);
+    setRarities([]);
+  };
+
+  const resultLabel = query || layerActive
+    ? `${hits.length} 筆${layerSummary ? `　${layerSummary}` : ""}`
+    : recents.length
+      ? "最近查看"
+      : "";
+
   return (
-    <div className="flex min-h-dvh flex-col bg-bg text-fg">
-      <header className="border-b border-border bg-bg">
-        <div className="mx-auto flex max-w-6xl items-end justify-between gap-4 px-4 pb-3 pt-5 sm:px-6">
+    <div className="flex h-dvh flex-col overflow-hidden bg-bg text-fg">
+      <header className="shrink-0 border-b border-border bg-bg">
+        <div className="mx-auto flex max-w-6xl items-end justify-between gap-4 px-4 py-2.5 sm:px-6 sm:pb-3 sm:pt-5">
           <div>
-            <p className="text-xs tracking-widest text-faint">EIKETSU TAISEN</p>
-            <h1 className="font-display text-2xl tracking-tight text-balance sm:text-3xl">英傑大戦 速查</h1>
-            <p className="mt-1 text-sm text-muted">對戰時查計略時長（C）同效果值。</p>
+            <p className="hidden text-xs tracking-widest text-faint sm:block">EIKETSU TAISEN</p>
+            <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦 速查</h1>
+            <p className="mt-1 hidden text-sm text-muted sm:block">對戰時查計略時長（C）同效果值。</p>
           </div>
           <p className="hidden text-xs tabular-nums text-faint sm:block">{CARD_COUNT} 張</p>
         </div>
@@ -96,7 +112,7 @@ export function ScoutApp() {
       </header>
 
       {tab === "skills" ? (
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6 sm:px-6">
+        <main className="mx-auto w-full max-w-3xl min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
           <p className="text-sm leading-relaxed text-pretty text-muted">
             1C＝2.4 秒，全場 99C。下面係各特技嘅持續／成本換算。計略嘅具體 C 數喺武將詳情。
           </p>
@@ -108,9 +124,9 @@ export function ScoutApp() {
           </div>
         </main>
       ) : (
-        <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
-          <section className="flex min-w-0 flex-col border-border lg:border-r">
-            <div className="sticky top-0 z-10 border-b border-border bg-bg/95 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
+          <section className="flex min-h-0 min-w-0 flex-col border-border lg:border-r">
+            <div className="shrink-0 border-b border-border bg-bg px-4 py-2.5 sm:px-6">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-faint" />
                 <Input
@@ -140,7 +156,31 @@ export function ScoutApp() {
                 ) : null}
               </div>
 
-              <div className="mt-3 flex flex-col gap-1 overflow-x-hidden">
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex h-8 shrink-0 items-center gap-0.5 rounded-md bg-surface-2 px-2.5 text-xs text-fg lg:hidden"
+                  onClick={() => setFiltersOpen((v) => !v)}
+                  aria-expanded={filtersOpen}
+                >
+                  篩選
+                  {filtersOpen ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+                </button>
+                <p className="min-w-0 flex-1 truncate text-xs tabular-nums text-faint">{resultLabel}</p>
+                {layerActive ? (
+                  <button type="button" className="h-8 shrink-0 text-xs text-muted hover:text-fg" onClick={clearFilters}>
+                    清除
+                  </button>
+                ) : null}
+              </div>
+
+              <div
+                className={cn(
+                  "flex-col gap-1 overflow-x-hidden",
+                  filtersOpen ? "mt-2 flex max-h-[min(52vh,26rem)] overflow-y-auto" : "hidden",
+                  "lg:mt-3 lg:flex lg:max-h-none lg:overflow-visible",
+                )}
+              >
                 <FilterRule label="勢力" />
                 <ChipGrid
                   cols="grid-cols-7"
@@ -191,71 +231,45 @@ export function ScoutApp() {
                     />
                   </div>
                 </div>
-              </div>
 
-              <div className="mt-2 flex items-center justify-between">
-                <button
-                  type="button"
-                  className="h-9 text-xs text-muted hover:text-fg"
-                  onClick={() => setMoreFilters((v) => !v)}
-                >
-                  特技／稀有{skills.length + rarities.length ? ` ${skills.length + rarities.length}` : ""}
-                </button>
-                {layerActive ? (
+                <div className="mt-1 flex items-center justify-between">
                   <button
                     type="button"
-                    className="h-9 text-xs text-muted hover:text-fg"
-                    onClick={() => {
-                      setColors([]);
-                      setCosts([]);
-                      setUnits([]);
-                      setPeriods([]);
-                      setSkills([]);
-                      setRarities([]);
-                    }}
+                    className="h-8 text-xs text-muted hover:text-fg"
+                    onClick={() => setMoreFilters((v) => !v)}
                   >
-                    清除篩選
+                    特技／稀有{skills.length + rarities.length ? ` ${skills.length + rarities.length}` : ""}
                   </button>
-                ) : (
-                  <span />
-                )}
-              </div>
-
-              {moreFilters ? (
-                <div className="mt-1 flex flex-col gap-1 overflow-x-hidden pb-1">
-                  <FilterRule label="特技" />
-                  <ChipGrid
-                    cols="grid-cols-4 sm:grid-cols-6"
-                    items={SKILLS.map((s) => ({
-                      key: String(s.id),
-                      label: s.name,
-                      active: skills.includes(s.id),
-                      toggle: () => toggle(skills, s.id, setSkills),
-                    }))}
-                  />
-                  <FilterRule label="稀有" />
-                  <ChipGrid
-                    cols="grid-cols-4"
-                    items={RARITIES.map((r) => ({
-                      key: r,
-                      label: r,
-                      active: rarities.includes(r),
-                      toggle: () => toggle(rarities, r, setRarities),
-                    }))}
-                  />
                 </div>
-              ) : null}
 
-              {query || layerActive ? (
-                <p className="mt-2 text-xs tabular-nums text-faint">
-                  {hits.length} 筆{layerSummary ? `　${layerSummary}` : ""}
-                </p>
-              ) : recents.length ? (
-                <p className="mt-2 text-xs text-faint">最近查看</p>
-              ) : null}
+                {moreFilters ? (
+                  <div className="flex flex-col gap-1 overflow-x-hidden pb-1">
+                    <FilterRule label="特技" />
+                    <ChipGrid
+                      cols="grid-cols-4 sm:grid-cols-6"
+                      items={SKILLS.map((s) => ({
+                        key: String(s.id),
+                        label: s.name,
+                        active: skills.includes(s.id),
+                        toggle: () => toggle(skills, s.id, setSkills),
+                      }))}
+                    />
+                    <FilterRule label="稀有" />
+                    <ChipGrid
+                      cols="grid-cols-4"
+                      items={RARITIES.map((r) => ({
+                        key: r,
+                        label: r,
+                        active: rarities.includes(r),
+                        toggle: () => toggle(rarities, r, setRarities),
+                      }))}
+                    />
+                  </div>
+                ) : null}
+              </div>
             </div>
 
-            <ul className="flex-1 overflow-y-auto px-2 py-2 sm:px-4">
+            <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2 sm:px-4">
               {!hits.length ? (
                 <li className="px-3 py-16 text-center text-sm text-muted">
                   {query || layerActive ? "搵唔到。試下改篩選或卡號（蒼173）。" : "對戰時輸入對手武將名或卡號。"}
@@ -334,7 +348,7 @@ function TabBtn({
       type="button"
       onClick={() => setTab(id)}
       className={cn(
-        "flex h-11 items-center gap-2 border-b-2 px-3 text-sm",
+        "flex h-10 items-center gap-2 border-b-2 px-3 text-sm sm:h-11",
         active ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg",
       )}
     >
