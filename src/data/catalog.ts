@@ -645,6 +645,135 @@ export function konshinTiers(card: Card): KonshinTier[] | null {
   ];
 }
 
+export type KokouCol = {
+  id: string;
+  title: string;
+  swords: number | null;
+  highlight: boolean;
+  rows: StatLine[];
+};
+
+export type KokouTiers = {
+  max: number | null;
+  note: string;
+  shared: StatLine[];
+  extra: { title: string; rows: StatLine[] } | null;
+  cols: KokouCol[];
+};
+
+export function isKokouCard(card: Card): boolean {
+  return (card.stratCats ?? []).includes("琥煌");
+}
+
+function parseFullWidthInt(raw: string): number {
+  const z = "０１２３４５６７８９";
+  return Number(
+    [...raw].map((ch) => {
+      const i = z.indexOf(ch);
+      return i >= 0 ? String(i) : ch;
+    }).join(""),
+  );
+}
+
+function parseKokouMax(desc: string): number | null {
+  const m = desc.match(/最大消費\s*([0-9０-９]+)/);
+  if (!m) return null;
+  const n = parseFullWidthInt(m[1]);
+  return Number.isFinite(n) ? n : null;
+}
+
+function pickKokouSplitLabel(items: CardEffect[], expected: number | null): string | null {
+  const counts = new Map<string, number>();
+  for (const item of items) counts.set(item.label, (counts.get(item.label) ?? 0) + 1);
+  const ranked = [...counts.entries()]
+    .filter(([label]) => label !== "特殊効果")
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  if (expected) {
+    const exact = ranked.find(([, n]) => n === expected);
+    if (exact) return exact[0];
+    const almost = ranked.find(([, n]) => n === expected - 1 || n === expected + 1);
+    if (almost) return almost[0];
+  }
+  return ranked[0] && ranked[0][1] >= 2 ? ranked[0][0] : null;
+}
+
+function splitRepeatingGroups(items: CardEffect[], splitLabel: string): CardEffect[][] {
+  const groups: CardEffect[][] = [];
+  let current: CardEffect[] = [];
+  for (const item of items) {
+    if (item.label === splitLabel && current.some((row) => row.label === splitLabel)) {
+      groups.push(current);
+      current = [item];
+    } else {
+      current.push(item);
+    }
+  }
+  if (current.length) groups.push(current);
+  return groups;
+}
+
+export function kokouTiers(card: Card): KokouTiers | null {
+  if (!isKokouCard(card)) return null;
+  const items = (card.effects ?? []).filter((e) => !skipKonshinLabel(e.label));
+  if (!items.length) return null;
+
+  const max = parseKokouMax(card.stratDesc);
+  const expected = max == null ? null : max + 1;
+  const splitLabel = pickKokouSplitLabel(items, expected);
+  const firstIdx = splitLabel ? items.findIndex((e) => e.label === splitLabel) : 0;
+  const shared = firstIdx > 0 ? items.slice(0, firstIdx) : [];
+  const rest = items.slice(Math.max(firstIdx, 0));
+  let groups = splitLabel ? splitRepeatingGroups(rest, splitLabel) : [rest];
+
+  let extra: CardEffect[] | null = null;
+  if (expected && groups.length === expected + 1) {
+    extra = groups[0];
+    groups = groups.slice(1);
+  }
+  if (expected && groups.length === expected - 1 && groups.length >= 1) {
+    const core = new Set(groups[0].map((e) => e.label));
+    const last = groups[groups.length - 1];
+    const cut = last.findIndex((e, i) => i > 0 && !core.has(e.label) && e.label !== splitLabel);
+    if (cut > 0) groups = [...groups.slice(0, -1), last.slice(0, cut), last.slice(cut)];
+  }
+
+  if (groups.length < 2) return null;
+
+  if (max == null) {
+    return {
+      max: 6,
+      note: "睇發動時所持劍數（唔係自己揀食幾多）。",
+      shared: effectRows(shared),
+      extra: extra ? { title: "無友軍", rows: effectRows(extra) } : null,
+      cols: [
+        { id: "0-5", title: "0–5劍", swords: null, highlight: false, rows: effectRows(groups[0] ?? []) },
+        {
+          id: "6",
+          title: "6劍",
+          swords: 6,
+          highlight: true,
+          rows: effectRows(groups.slice(1).flat()),
+        },
+      ],
+    };
+  }
+
+  return {
+    max,
+    note: `琥煌槽最多 6 劍。發動時食 0–${max} 劍，食愈多效果愈強。`,
+    shared: effectRows(shared),
+    extra: extra ? { title: "無友軍", rows: effectRows(extra) } : null,
+    cols: groups.map((group, i) => ({
+      id: String(i),
+      title: `${i}劍`,
+      swords: i,
+      highlight: i === groups.length - 1,
+      rows: effectRows(group),
+    })),
+  };
+}
+
+
 export function displayArea(card: Card): string {
   return translateArea(card.area ?? "");
 }
