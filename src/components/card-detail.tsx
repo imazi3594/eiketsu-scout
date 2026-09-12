@@ -11,14 +11,11 @@ import {
   type KonshinTier,
   type StatLine,
 } from "@/data/catalog";
-import { useScout } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { CardIdentity } from "@/components/card-identity";
 import { cn } from "@/lib/utils";
 
 export function CardDetail({ card }: { card: Card }) {
-  const notes = useScout((s) => s.notes);
-  const setNote = useScout((s) => s.setNote);
   const duration = formatStratDuration(card);
   const tiers = konshinTiers(card);
   const effects = tiers ? [] : displayEffects(card);
@@ -59,14 +56,6 @@ export function CardDetail({ card }: { card: Card }) {
 
         <p className="mt-3 text-sm leading-relaxed text-pretty text-muted">{displayStratDesc(card)}</p>
       </section>
-
-      <textarea
-        value={notes[card.id] ?? ""}
-        onChange={(e) => setNote(card.id, e.target.value)}
-        placeholder="應對筆記…"
-        rows={2}
-        className="w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      />
 
       <div className="flex gap-2">
         <Button variant="ghost" asChild>
