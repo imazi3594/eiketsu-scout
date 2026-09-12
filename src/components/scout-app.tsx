@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { CardDetail } from "@/components/card-detail";
 import { CardIdentity, CostPips } from "@/components/card-identity";
+import { UnitIcon } from "@/components/unit-icon";
 import { SkillExplain } from "@/components/skill-chip";
 import { cn } from "@/lib/utils";
 
@@ -203,8 +204,7 @@ export function ScoutApp() {
                     toggle: () => toggle(periods, p, setPeriods),
                   }))}
                 />
-                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,1fr)_11rem]">
-                  <div className="flex min-w-0 flex-col gap-1">
+                <div className="flex min-w-0 flex-col gap-1">
                     <FilterRule label="成本" />
                     <ChipGrid
                       cols="grid-cols-4"
@@ -220,17 +220,16 @@ export function ScoutApp() {
                   <div className="flex min-w-0 flex-col gap-1">
                     <FilterRule label="兵種" />
                     <ChipGrid
-                      cols="grid-cols-3"
+                      cols="grid-cols-5"
                       items={UNITS.map((u) => ({
                         key: u,
-                        label: UNIT_SHORT[u],
+                        label: <UnitIcon unit={u} className="size-5" />,
                         active: units.includes(u),
                         ariaLabel: u,
                         toggle: () => toggle(units, u, setUnits),
                       }))}
                     />
                   </div>
-                </div>
 
                 <div className="mt-1 flex items-center justify-between">
                   <button

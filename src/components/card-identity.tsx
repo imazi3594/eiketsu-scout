@@ -2,9 +2,9 @@ import {
   COLOR_CLASS,
   formatCost,
   skillNames,
-  UNIT_SHORT,
   type Card,
 } from "@/data/catalog";
+import { UnitIcon } from "@/components/unit-icon";
 import { cn } from "@/lib/utils";
 
 export function CostPips({ cost, small }: { cost: number; small?: boolean }) {
@@ -58,7 +58,7 @@ export function CardIdentity({ card, compact }: { card: Card; compact?: boolean 
         )}
       >
         <CostPips cost={card.cost} />
-        <span>{UNIT_SHORT[card.unit]}</span>
+        <UnitIcon unit={card.unit} title={card.unit} className={compact ? "size-4" : "size-[1.15rem]"} />
         <span>武 {card.power}</span>
         <span>知 {card.intel}</span>
       </p>
