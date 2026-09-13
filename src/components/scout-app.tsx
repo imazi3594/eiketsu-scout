@@ -265,7 +265,7 @@ export function ScoutApp() {
                   enterKeyHint="search"
                   inputMode="search"
                   placeholder="織田信長、蒼173、指揮、伏兵…"
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 [&::-webkit-search-cancel-button]:hidden"
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck={false}
