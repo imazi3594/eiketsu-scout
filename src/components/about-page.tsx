@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Copy, Download, Share, Smartphone } from "lucide-react";
-import { CARD_COUNT } from "@/data/catalog";
+import { CARD_COUNT, DATA_META } from "@/data/catalog";
 import { deviceKind, isStandalone, subscribeInstall, type BeforeInstall } from "@/lib/install";
 
 const PAGE_URL = "https://imazi3594.github.io/eiketsu-scout/";
@@ -135,7 +135,11 @@ export function AboutPage() {
       </section>
 
       <section className="mt-4 rounded-lg border border-white/10 bg-black/35 p-4 text-sm leading-relaxed text-pretty text-muted">
-        <p>
+        <p className="text-xs text-faint">資料版本</p>
+        <p className="mt-2 text-fg">英傑大戦 Ver.{DATA_META.gameVer}</p>
+        <p className="mt-1">{DATA_META.pack}</p>
+        <p className="mt-1 tabular-nums">遊戲更新 {DATA_META.gameDate.replaceAll("-", "/")}　資料擷取 {DATA_META.dataDate.replaceAll("-", "/")}</p>
+        <p className="mt-3">
           數值整理自{" "}
           <a className="text-fg underline decoration-border underline-offset-2" href="https://eiketsudb.com/" target="_blank" rel="noreferrer">
             eiketsudb.com

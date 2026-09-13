@@ -380,6 +380,14 @@ const payload = raw as { count: number; cards: Card[] };
 export const CARDS: Card[] = payload.cards;
 export const CARD_COUNT = payload.count;
 
+/** 資料對應嘅遊戲版同擷取日，下次 scrape 記得改。 */
+export const DATA_META = {
+  gameVer: "3.5.0G",
+  pack: "第６彈 古幻相剋の八象",
+  gameDate: "2026-08-19",
+  dataDate: "2026-09-13",
+} as const;
+
 export const CARD_BY_ID: Record<string, Card> = Object.fromEntries(CARDS.map((c) => [c.id, c]));
 
 export function skillById(id: number): SkillDef {
