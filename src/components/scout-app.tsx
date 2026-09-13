@@ -57,7 +57,7 @@ export function ScoutApp() {
   const [rarities, setRarities] = useState<string[]>([]);
   const [costs, setCosts] = useState<number[]>([]);
   const [moreFilters, setMoreFilters] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const [isDesktop, setIsDesktop] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches,
   );
