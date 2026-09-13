@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Info, Search, X, Zap } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Info, Search, X } from "lucide-react";
 import {
   CARD_BY_ID,
   CARDS,
@@ -209,8 +209,7 @@ export function ScoutApp() {
           <div>
             <p className="hidden text-xs tracking-widest text-faint sm:block">EIKETSU TAISEN</p>
             <div className="flex items-center gap-2">
-              <Zap className="size-5 fill-cost text-cost sm:size-6" strokeWidth={2.25} aria-hidden />
-              <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦 速查</h1>
+              <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦⚡️速查</h1>
             </div>
           </div>
           <button

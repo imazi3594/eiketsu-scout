@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Download, Share, Smartphone, Zap } from "lucide-react";
+import { Copy, Download, Share, Smartphone } from "lucide-react";
 import { CARD_COUNT } from "@/data/catalog";
 import { deviceKind, isStandalone, subscribeInstall, type BeforeInstall } from "@/lib/install";
 
@@ -66,8 +66,7 @@ export function AboutPage() {
           className="size-24 rounded-3xl shadow-[var(--shadow-border)]"
         />
         <div className="mt-4 flex items-center gap-2">
-          <Zap className="size-5 fill-cost text-cost" strokeWidth={2.25} aria-hidden />
-          <h2 className="font-display text-2xl tracking-tight">英傑大戦 速查</h2>
+          <h2 className="font-display text-2xl tracking-tight">英傑大戦⚡️速查</h2>
         </div>
         <p className="mt-2 text-sm text-muted">對戰用口袋手冊　·　{CARD_COUNT} 張</p>
       </div>
