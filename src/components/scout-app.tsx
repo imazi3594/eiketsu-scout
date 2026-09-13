@@ -263,7 +263,7 @@ export function ScoutApp() {
         </main>
       ) : (
         <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
-          <section className="flex min-h-0 min-w-0 flex-col border-border lg:border-r">
+          <section className="flex min-h-0 min-w-0 flex-1 flex-col border-border lg:border-r">
             <div className="shrink-0 border-b border-border bg-bg px-4 py-2.5 sm:px-6">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-faint" />
