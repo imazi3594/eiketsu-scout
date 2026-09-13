@@ -349,7 +349,7 @@ export function ScoutApp() {
                     label: c,
                     active: colors.includes(c),
                     className: cn(COLOR_BAR[c], "text-fg ring-2 ring-inset ring-fg"),
-                    idleClassName: cn(COLOR_BAR[c], "text-fg opacity-45"),
+                    idleClassName: cn(COLOR_BAR[c], "text-fg opacity-75"),
                     toggle: () => toggle(colors, c, setColors),
                   }))}
                 />
