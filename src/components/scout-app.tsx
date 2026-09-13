@@ -336,10 +336,10 @@ export function ScoutApp() {
                 <div className="flex min-w-0 flex-col gap-1">
                     <FilterRule label="成本" />
                     <ChipGrid
-                      cols="grid-cols-4"
+                      cols="grid-cols-7"
                       items={COSTS.map((c) => ({
                         key: String(c),
-                        label: <CostPips cost={c} small />,
+                        label: <CostPips cost={c} small stacked />,
                         active: costs.includes(c),
                         ariaLabel: `${formatCost(c)} cost`,
                         toggle: () => toggle(costs, c, setCosts),
