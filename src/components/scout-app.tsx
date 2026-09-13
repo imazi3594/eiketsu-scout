@@ -22,10 +22,10 @@ import { useScout } from "@/lib/store";
 import { Input } from "@/components/ui/input";
 import { CardDetail } from "@/components/card-detail";
 import { CardThemeBackdrop } from "@/components/card-theme";
-import { CardIdentity, CostPips } from "@/components/card-identity";
+import { CostPips } from "@/components/card-identity";
 import { UnitIcon } from "@/components/unit-icon";
 import { AboutPage } from "@/components/about-page";
-import { SkillExplain } from "@/components/skill-chip";
+import { SkillExplain, SkillList } from "@/components/skill-chip";
 import { cn } from "@/lib/utils";
 import { initInstallCapture } from "@/lib/install";
 
@@ -431,14 +431,24 @@ export function ScoutApp() {
                           pushView({ v: "card", id: card.id });
                         }}
                         className={cn(
-                          "flex w-full items-start gap-3 rounded-lg px-2 py-2.5 text-left transition-colors duration-[var(--motion-quick)]",
+                          "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-[var(--motion-quick)]",
                           active ? "bg-surface-2" : "hover:bg-surface",
                         )}
                       >
-                        <span className={cn("mt-1 h-8 w-1 shrink-0 rounded-full", COLOR_BAR[card.color])} aria-hidden />
+                        <span className={cn("h-7 w-1 shrink-0 rounded-full", COLOR_BAR[card.color])} aria-hidden />
                         <div className="min-w-0 flex-1">
-                          <CardIdentity card={card} compact />
-                          <p className="mt-1 truncate text-xs text-faint">
+                          <p className="flex min-w-0 items-center gap-1.5 text-xs">
+                            <span className={cn("shrink-0 rounded-sm px-1 py-px font-medium", COLOR_CLASS[card.color])}>
+                              {card.no}
+                            </span>
+                            <span className="min-w-0 truncate font-medium text-fg">{card.name}</span>
+                            {card.skills.length ? (
+                              <span className="ml-auto flex shrink-0 items-center gap-1">
+                                <SkillList ids={card.skills} compact />
+                              </span>
+                            ) : null}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-faint">
                             <span className="tabular-nums text-fg">{dur.compact}</span>
                             {"　"}
                             {card.stratName}　士氣{card.stratCost}
