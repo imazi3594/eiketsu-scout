@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { UnitName } from "@/data/catalog";
 import { cn } from "@/lib/utils";
 
@@ -13,10 +14,12 @@ export function UnitIcon({
   unit,
   className,
   title,
+  style,
 }: {
   unit: UnitName;
   className?: string;
   title?: string;
+  style?: CSSProperties;
 }) {
   const src = `${import.meta.env.BASE_URL}units/${FILE[unit]}`;
   return (
@@ -31,6 +34,7 @@ export function UnitIcon({
         maskRepeat: "no-repeat",
         WebkitMaskPosition: "center",
         maskPosition: "center",
+        ...style,
       }}
       role={title ? "img" : undefined}
       aria-label={title}

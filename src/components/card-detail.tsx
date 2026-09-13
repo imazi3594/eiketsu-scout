@@ -30,7 +30,7 @@ export function CardDetail({ card }: { card: Card }) {
     <div className="flex flex-col gap-4 pb-8">
       <CardIdentity card={card} />
 
-      <section className="rounded-lg border border-border bg-surface p-4">
+      <section className="rounded-lg border border-white/10 bg-surface/55 p-4 backdrop-blur-[2px]">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-display text-xl leading-tight">{card.stratName}</p>

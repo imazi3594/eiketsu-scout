@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Search, X } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Search, X, Zap } from "lucide-react";
 import {
   CARD_BY_ID,
   CARD_COUNT,
@@ -23,6 +23,7 @@ import { useScout } from "@/lib/store";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { CardDetail } from "@/components/card-detail";
+import { CardThemeBackdrop } from "@/components/card-theme";
 import { CardIdentity, CostPips } from "@/components/card-identity";
 import { UnitIcon } from "@/components/unit-icon";
 import { SkillExplain } from "@/components/skill-chip";
@@ -101,8 +102,10 @@ export function ScoutApp() {
         <div className="mx-auto flex max-w-6xl items-end justify-between gap-4 px-4 py-2.5 sm:px-6 sm:pb-3 sm:pt-5">
           <div>
             <p className="hidden text-xs tracking-widest text-faint sm:block">EIKETSU TAISEN</p>
-            <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦 速查</h1>
-            <p className="mt-1 hidden text-sm text-muted sm:block">對戰時查計略時長（C）同效果值。</p>
+            <div className="flex items-center gap-2">
+              <Zap className="size-5 fill-cost text-cost sm:size-6" strokeWidth={2.25} aria-hidden />
+              <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦 速查</h1>
+            </div>
           </div>
           <p className="hidden text-xs tabular-nums text-faint sm:block">{CARD_COUNT} 張</p>
         </div>
@@ -304,24 +307,28 @@ export function ScoutApp() {
             </ul>
           </section>
 
-          <aside className="hidden min-h-0 overflow-y-auto p-5 lg:block">
-            {selected ? (
-              <CardDetail card={selected} />
-            ) : (
-              <p className="text-sm leading-relaxed text-pretty text-muted">
-                揀一張武將，即睇計略時長同效果值。
-              </p>
-            )}
+          <aside className="relative hidden min-h-0 overflow-hidden lg:block">
+            {selected ? <CardThemeBackdrop card={selected} /> : null}
+            <div className="relative z-10 h-full overflow-y-auto p-5">
+              {selected ? (
+                <CardDetail card={selected} />
+              ) : (
+                <p className="text-sm leading-relaxed text-pretty text-muted">
+                  揀一張武將，即睇計略時長同效果值。
+                </p>
+              )}
+            </div>
           </aside>
         </div>
       )}
 
       <Sheet open={Boolean(selected) && tab === "search" && !isDesktop} onOpenChange={(o) => !o && select(null)}>
-        <SheetContent side="bottom" className="lg:hidden">
-          <SheetHeader>
+        <SheetContent side="bottom" className="relative overflow-hidden bg-bg lg:hidden">
+          {selected ? <CardThemeBackdrop card={selected} /> : null}
+          <SheetHeader className="relative z-10 p-3 pb-0 pr-12">
             <SheetTitle className="sr-only">{selected?.name ?? "武將"}</SheetTitle>
           </SheetHeader>
-          <div className="overflow-y-auto px-4">{selected ? <CardDetail card={selected} /> : null}</div>
+          <div className="relative z-10 overflow-y-auto px-4">{selected ? <CardDetail card={selected} /> : null}</div>
         </SheetContent>
       </Sheet>
     </div>
