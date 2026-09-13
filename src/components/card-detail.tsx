@@ -17,11 +17,11 @@ import { Button } from "@/components/ui/button";
 import { CardIdentity } from "@/components/card-identity";
 import { cn } from "@/lib/utils";
 
-export function StratTitle({ card, compact }: { card: Card; compact?: boolean }) {
+export function StratTitle({ card }: { card: Card }) {
   const cats = displayCats(card);
   return (
-    <div className="min-w-0 text-right">
-      <p className={cn("leading-tight text-fg", compact ? "font-medium" : "font-display text-xl")}>{card.stratName}</p>
+    <div className="min-w-0">
+      <p className="font-display text-xl leading-tight text-fg">{card.stratName}</p>
       <p className="mt-0.5 text-xs text-muted">
         {cats.length ? `${cats.join(" · ")} · ` : null}士氣 {card.stratCost}
       </p>
@@ -35,41 +35,47 @@ export function CardDetail({ card }: { card: Card }) {
   const kokou = konshin ? null : kokouTiers(card);
   const effects = konshin || kokou ? [] : displayEffects(card);
   const area = displayArea(card);
+  const desc = displayStratDesc(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
+  const hasData = Boolean(konshin || kokou || effects.length || area || duration.label);
 
   return (
-    <div className="flex flex-col gap-4 pb-8">
-      <CardIdentity card={card} extra={<StratTitle card={card} />} />
+    <div className="flex flex-col gap-3 pb-8">
+      <CardIdentity card={card} />
 
       <section className="rounded-lg border border-white/10 bg-black/35 p-4">
-        <div className="flex items-start justify-end gap-3">
-          <div className="min-w-0 text-right">
-            <p className="font-display text-3xl whitespace-nowrap tabular-nums leading-none text-fg">{duration.label}</p>
-            {meta.length ? (
-              <p className="mt-1.5 text-xs leading-relaxed text-pretty tabular-nums text-muted">
-                {meta.join(" · ")}
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        {konshin ? (
-          <KonshinGrid tiers={konshin} />
-        ) : kokou ? (
-          <KokouGrid data={kokou} />
-        ) : effects.length ? (
-          <EffectList rows={effects} />
-        ) : null}
-
-        {area ? (
-          <p className="mt-3 text-sm text-muted">
-            <span className="text-xs text-faint">範圍　</span>
-            {area}
-          </p>
-        ) : null}
-
-        <p className="mt-3 text-sm leading-relaxed text-pretty text-muted">{displayStratDesc(card)}</p>
+        <StratTitle card={card} />
+        {desc ? <p className="mt-3 text-sm leading-relaxed text-pretty text-fg">{desc}</p> : null}
       </section>
+
+      {hasData ? (
+        <section className="rounded-lg border border-white/10 bg-black/35 p-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-xs text-faint">時長</p>
+            <p className="font-display text-3xl whitespace-nowrap tabular-nums leading-none text-fg">{duration.label}</p>
+          </div>
+          {meta.length ? (
+            <p className="mt-1.5 text-right text-xs leading-relaxed text-pretty tabular-nums text-muted">
+              {meta.join(" · ")}
+            </p>
+          ) : null}
+
+          {konshin ? (
+            <KonshinGrid tiers={konshin} />
+          ) : kokou ? (
+            <KokouGrid data={kokou} />
+          ) : effects.length ? (
+            <EffectList rows={effects} />
+          ) : null}
+
+          {area ? (
+            <p className="mt-3 text-sm text-muted">
+              <span className="text-xs text-faint">範圍　</span>
+              {area}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className="flex gap-2">
         <Button variant="ghost" asChild>
