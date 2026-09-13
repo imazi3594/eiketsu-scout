@@ -57,7 +57,7 @@ export function CostPips({ cost, small, stacked }: { cost: number; small?: boole
 export function CardIdentity({ card, compact }: { card: Card; compact?: boolean }) {
   const NameTag = compact ? "p" : "h2";
   return (
-    <div className="min-w-0">
+    <div className={cn("min-w-0", !compact && "pr-8")}>
       <p className="flex flex-wrap items-center gap-1.5 text-xs">
         <span
           className={cn(
