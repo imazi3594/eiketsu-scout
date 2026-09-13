@@ -516,12 +516,36 @@ function parseDurationValue(value: string): { durC: number; depC: number | null 
   return { durC: Number(match[1]), depC: dep ? Number(dep[1]) : null };
 }
 
-/** 本計時長：有短計時唔好用短計嗰條 効果時間。優先取主效果入面帶知力依存嘅時長。 */
+function durationRank(effect: CardEffect): number {
+  const { label, value } = effect;
+  if (/^[+＋]/.test(value.trim())) return -1;
+  if (/(撃破時|追加|攻城時)/.test(label)) return -1;
+  if (/基本/.test(label)) return 100;
+  if (label === "効果時間" && /知力依存/.test(value)) return 90;
+  if (/自身|味方/.test(label) && /知力依存/.test(value)) return 85;
+  if (label === "効果時間") return 40;
+  if (/最大/.test(label)) return 15;
+  if (/\d/.test(value)) return 10;
+  return -1;
+}
+
+function pickMainDurationEffect(card: Card): CardEffect | null {
+  let best: CardEffect | null = null;
+  let bestRank = -1;
+  for (const effect of mainEffects(card)) {
+    if (!effect.label.startsWith("効果時間")) continue;
+    const rank = durationRank(effect);
+    if (rank > bestRank) {
+      best = effect;
+      bestRank = rank;
+    }
+  }
+  return best;
+}
+
+/** 本計時長：優先 効果時間(基本)，有短計時唔好用短計嗰條。 */
 function pickMainDuration(card: Card): { durC: number | null; depC: number | null; note: string } {
-  const durs = mainEffects(card).filter((effect) => effect.label.startsWith("効果時間"));
-  const preferred =
-    durs.find((effect) => /知力依存/.test(effect.value)) ??
-    durs.find((effect) => /\d+(?:\.\d+)?\s*C/.test(effect.value) && !/自身が知力/.test(effect.value));
+  const preferred = pickMainDurationEffect(card);
   if (preferred) {
     const parsed = parseDurationValue(preferred.value);
     if (parsed) return { durC: parsed.durC, depC: parsed.depC ?? card.depC, note: preferred.value };
@@ -573,7 +597,7 @@ export function formatStratDuration(card: Card): StratDuration {
 }
 
 export function displayEffects(card: Card): StatLine[] {
-  return effectRows(mainEffects(card));
+  return effectRows(mainEffects(card), pickMainDurationEffect(card));
 }
 
 /** 紫勢力渾身：eiketsudb 由弱至強（無→弱→強），畫面由左至右 強｜弱｜無。 */
@@ -644,11 +668,15 @@ function collapseKonshinGroups(groups: CardEffect[][]): CardEffect[][] {
   return [groups[0], groups[1], groups.slice(2).flat()];
 }
 
-function effectRows(effects: CardEffect[]): StatLine[] {
+function effectRows(effects: CardEffect[], hide?: CardEffect | null): StatLine[] {
   const rows: StatLine[] = [];
   const seen = new Set<string>();
   for (const effect of effects) {
-    if (isDurationEffectLabel(effect.label) || effect.label.startsWith("効果時間")) continue;
+    if (hide) {
+      if (effect.label === hide.label && effect.value === hide.value) continue;
+    } else if (isDurationEffectLabel(effect.label) || effect.label.startsWith("効果時間")) {
+      continue;
+    }
     const label = translateLabel(effect.label);
     const value = translateValue(effect.value);
     const key = `${label}|${value}`;
