@@ -17,28 +17,34 @@ import { Button } from "@/components/ui/button";
 import { CardIdentity } from "@/components/card-identity";
 import { cn } from "@/lib/utils";
 
-export function CardDetail({ card }: { card: Card }) {
+export function StratTitle({ card, compact }: { card: Card; compact?: boolean }) {
+  const cats = displayCats(card);
+  return (
+    <div className="min-w-0">
+      <p className={cn("leading-tight text-fg", compact ? "font-medium" : "font-display text-xl")}>{card.stratName}</p>
+      <p className="mt-0.5 text-xs text-muted">
+        {cats.length ? `${cats.join(" · ")} · ` : null}士氣 {card.stratCost}
+      </p>
+    </div>
+  );
+}
+
+export function CardDetail({ card, hideTitle }: { card: Card; hideTitle?: boolean }) {
   const duration = formatStratDuration(card);
   const konshin = konshinTiers(card);
   const kokou = konshin ? null : kokouTiers(card);
   const effects = konshin || kokou ? [] : displayEffects(card);
   const area = displayArea(card);
-  const cats = displayCats(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
 
   return (
     <div className="flex flex-col gap-4 pb-8">
       <CardIdentity card={card} />
+      {hideTitle ? null : <StratTitle card={card} />}
 
       <section className="rounded-lg border border-white/10 bg-black/35 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-display text-xl leading-tight">{card.stratName}</p>
-            <p className="mt-1 text-xs text-muted">
-              {cats.length ? `${cats.join(" · ")} · ` : null}士氣 {card.stratCost}
-            </p>
-          </div>
-          <div className="shrink-0 text-right">
+        <div className="flex items-start justify-end gap-3">
+          <div className="min-w-0 text-right">
             <p className="font-display text-3xl whitespace-nowrap tabular-nums leading-none text-fg">{duration.label}</p>
             {meta.length ? (
               <p className="mt-1.5 text-xs leading-relaxed text-pretty tabular-nums text-muted">

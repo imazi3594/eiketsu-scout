@@ -21,7 +21,7 @@ import {
 import { filterCards, searchCards } from "@/lib/search";
 import { useScout } from "@/lib/store";
 import { Input } from "@/components/ui/input";
-import { CardDetail } from "@/components/card-detail";
+import { CardDetail, StratTitle } from "@/components/card-detail";
 import { CardThemeBackdrop } from "@/components/card-theme";
 import { CardIdentity, CostPips } from "@/components/card-identity";
 import { UnitIcon } from "@/components/unit-icon";
@@ -330,7 +330,10 @@ export function ScoutApp() {
       {selected && tab === "search" && !isDesktop ? (
         <div className="absolute inset-0 z-50 flex min-h-0 flex-col bg-bg">
           <CardThemeBackdrop card={selected} />
-          <div className="relative z-10 flex shrink-0 items-center justify-end px-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+          <div className="relative z-10 flex shrink-0 items-start gap-2 px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pr-2">
+            <div className="min-w-0 flex-1 pt-2">
+              <StratTitle card={selected} />
+            </div>
             <button
               type="button"
               onClick={() => select(null)}
@@ -341,7 +344,7 @@ export function ScoutApp() {
             </button>
           </div>
           <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-            <CardDetail card={selected} />
+            <CardDetail card={selected} hideTitle />
           </div>
         </div>
       ) : null}
