@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Info, Search, X } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Clock, Info, Search, X } from "lucide-react";
 import {
   CARD_BY_ID,
   CARDS,
@@ -16,12 +16,13 @@ import {
   UNITS,
   UNIT_SHORT,
   type ColorName,
+  type Card,
 } from "@/data/catalog";
 import { filterCards, searchCards } from "@/lib/search";
 import { useScout } from "@/lib/store";
 import { Input } from "@/components/ui/input";
 import { CardDetail } from "@/components/card-detail";
-import { CardThemeBackdrop } from "@/components/card-theme";
+import { CardThemeBackdrop, HomeWash } from "@/components/card-theme";
 import { CostPips } from "@/components/card-identity";
 import { UnitIcon } from "@/components/unit-icon";
 import { AboutPage } from "@/components/about-page";
@@ -31,18 +32,20 @@ import { initInstallCapture } from "@/lib/install";
 
 initInstallCapture();
 
-type Tab = "search" | "skills" | "about";
+type Tab = "search" | "skills" | "recents" | "about";
 type Hist =
   | { v: "root" }
   | { v: "home" }
   | { v: "card"; id: string }
   | { v: "skills" }
+  | { v: "recents" }
   | { v: "about" }
   | { v: "filters" };
 
 function histOf(tab: Tab, selectedId: string | null, filtersOpen: boolean): Hist {
   if (tab === "about") return { v: "about" };
   if (tab === "skills") return { v: "skills" };
+  if (tab === "recents") return { v: "recents" };
   if (selectedId) return { v: "card", id: selectedId };
   if (filtersOpen) return { v: "filters" };
   return { v: "home" };
@@ -94,6 +97,11 @@ export function ScoutApp() {
       setFiltersOpen(false);
       return;
     }
+    if (s.v === "recents") {
+      setTab("recents");
+      select(null);
+      return;
+    }
     setTab("search");
     if (s.v === "card") {
       select(s.id);
@@ -109,12 +117,12 @@ export function ScoutApp() {
 
   function goTab(next: Tab) {
     if (next === tab) {
-      if (next === "search" && selectedId) {
+      if ((next === "search" || next === "recents") && selectedId) {
         const cur = history.state as Hist | null;
         if (cur?.v === "card") history.back();
         else {
           select(null);
-          pushView({ v: filtersOpen ? "filters" : "home" });
+          pushView(next === "recents" ? { v: "recents" } : { v: filtersOpen ? "filters" : "home" });
         }
       }
       return;
@@ -170,13 +178,16 @@ export function ScoutApp() {
 
   const hits = useMemo(() => {
     const q = query.trim();
-    if (!q && !layerActive) {
-      return recents.slice(0, 5).map((id) => CARD_BY_ID[id]).filter(Boolean);
-    }
+    if (!q && !layerActive) return [];
     let list = q ? searchCards(q, 200).map((h) => h.card) : CARDS;
     if (layerActive) list = filterCards(list, { colors, periods, units, skills, rarities, costs });
     return list;
-  }, [query, colors, periods, units, skills, rarities, costs, recents, layerActive]);
+  }, [query, colors, periods, units, skills, rarities, costs, layerActive]);
+
+  const recentCards = useMemo(
+    () => recents.map((id) => CARD_BY_ID[id]).filter(Boolean),
+    [recents],
+  );
 
   const layerSummary = [
     colors.length ? colors.join(" ") : null,
@@ -196,11 +207,7 @@ export function ScoutApp() {
     setRarities([]);
   };
 
-  const resultLabel = query || layerActive
-    ? `${hits.length} 筆${layerSummary ? `　${layerSummary}` : ""}`
-    : recents.length
-      ? "最近查看"
-      : "";
+  const resultLabel = query || layerActive ? `${hits.length} 筆${layerSummary ? `　${layerSummary}` : ""}` : "";
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-bg text-fg">
@@ -228,6 +235,7 @@ export function ScoutApp() {
         <nav className="mx-auto flex max-w-6xl gap-1 px-4 sm:px-6">
           <TabBtn id="search" tab={tab} setTab={goTab} icon={<Search className="size-4" />} label="速查" />
           <TabBtn id="skills" tab={tab} setTab={goTab} icon={<BookOpen className="size-4" />} label="特技" />
+          <TabBtn id="recents" tab={tab} setTab={goTab} icon={<Clock className="size-4" />} label="最近" />
         </nav>
       </header>
 
@@ -244,6 +252,30 @@ export function ScoutApp() {
               <SkillExplain key={s.id} id={s.id} />
             ))}
           </div>
+        </main>
+      ) : tab === "recents" ? (
+        <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col">
+          <p className="shrink-0 px-4 pt-3 pb-1 text-xs tabular-nums text-faint sm:px-6">
+            {recents.length ? `最近 ${recents.length} 張` : "最近查看"}
+          </p>
+          <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2 sm:px-4">
+            {recentCards.length ? (
+              recentCards.map((card) => (
+                <li key={card.id}>
+                  <CardHitRow
+                    card={card}
+                    active={card.id === selectedId}
+                    onOpen={() => {
+                      select(card.id);
+                      pushView({ v: "card", id: card.id });
+                    }}
+                  />
+                </li>
+              ))
+            ) : (
+              <li className="px-3 py-16 text-center text-sm text-muted">未睇過武將。喺速查打開過就會出現喺呢度。</li>
+            )}
+          </ul>
         </main>
       ) : (
         <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
@@ -413,53 +445,35 @@ export function ScoutApp() {
               </div>
             </div>
 
-            <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2 sm:px-4">
-              {!hits.length ? (
-                <li className="px-3 py-16 text-center text-sm text-muted">
-                  {query || layerActive ? "搵唔到。試下改篩選或卡號（蒼173）。" : "對戰時輸入對手武將名或卡號。"}
-                </li>
+            <div className="relative min-h-0 flex-1">
+              {!query.trim() && !layerActive ? (
+                <div className="absolute inset-0">
+                  <HomeWash />
+                  <p className="relative z-10 px-6 pt-16 text-center text-sm leading-relaxed text-pretty text-muted">
+                    打個名、卡號或計略就查。
+                  </p>
+                </div>
               ) : (
-                hits.map((card) => {
-                  const active = card.id === selectedId;
-                  const dur = formatStratDuration(card);
-                  return (
-                    <li key={card.id}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          select(card.id);
-                          pushView({ v: "card", id: card.id });
-                        }}
-                        className={cn(
-                          "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-[var(--motion-quick)]",
-                          active ? "bg-surface-2" : "hover:bg-surface",
-                        )}
-                      >
-                        <span className={cn("h-7 w-1 shrink-0 rounded-full", COLOR_BAR[card.color])} aria-hidden />
-                        <div className="min-w-0 flex-1">
-                          <p className="flex min-w-0 items-center gap-1.5 text-xs">
-                            <span className={cn("shrink-0 rounded-sm px-1 py-px font-medium", COLOR_CLASS[card.color])}>
-                              {card.no}
-                            </span>
-                            <span className="min-w-0 truncate font-medium text-fg">{card.name}</span>
-                            {card.skills.length ? (
-                              <span className="ml-auto flex shrink-0 items-center gap-1">
-                                <SkillList ids={card.skills} compact />
-                              </span>
-                            ) : null}
-                          </p>
-                          <p className="mt-0.5 truncate text-xs text-faint">
-                            <span className="tabular-nums text-fg">{dur.compact}</span>
-                            {"　"}
-                            {card.stratName}　士氣{card.stratCost}
-                          </p>
-                        </div>
-                      </button>
-                    </li>
-                  );
-                })
+                <ul className="h-full overflow-y-auto overscroll-contain px-2 py-2 sm:px-4">
+                  {!hits.length ? (
+                    <li className="px-3 py-16 text-center text-sm text-muted">搵唔到。試下改篩選或卡號（蒼173）。</li>
+                  ) : (
+                    hits.map((card) => (
+                      <li key={card.id}>
+                        <CardHitRow
+                          card={card}
+                          active={card.id === selectedId}
+                          onOpen={() => {
+                            select(card.id);
+                            pushView({ v: "card", id: card.id });
+                          }}
+                        />
+                      </li>
+                    ))
+                  )}
+                </ul>
               )}
-            </ul>
+            </div>
           </section>
 
           {isDesktop ? (
@@ -485,7 +499,7 @@ export function ScoutApp() {
         </div>
       ) : null}
 
-      {selected && tab === "search" && !isDesktop ? (
+      {selected && (tab === "search" || tab === "recents") && (tab === "recents" || !isDesktop) ? (
         <div className="absolute inset-0 z-50 flex min-h-0 flex-col bg-bg">
           <CardThemeBackdrop card={selected} />
           <button
@@ -506,6 +520,46 @@ export function ScoutApp() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+function CardHitRow({
+  card,
+  active,
+  onOpen,
+}: {
+  card: Card;
+  active: boolean;
+  onOpen: () => void;
+}) {
+  const dur = formatStratDuration(card);
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className={cn(
+        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-[var(--motion-quick)]",
+        active ? "bg-surface-2" : "hover:bg-surface",
+      )}
+    >
+      <span className={cn("h-7 w-1 shrink-0 rounded-full", COLOR_BAR[card.color])} aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="flex min-w-0 items-center gap-1.5 text-xs">
+          <span className={cn("shrink-0 rounded-sm px-1 py-px font-medium", COLOR_CLASS[card.color])}>{card.no}</span>
+          <span className="min-w-0 truncate font-medium text-fg">{card.name}</span>
+          {card.skills.length ? (
+            <span className="ml-auto flex shrink-0 items-center gap-1">
+              <SkillList ids={card.skills} compact />
+            </span>
+          ) : null}
+        </p>
+        <p className="mt-0.5 truncate text-xs text-faint">
+          <span className="tabular-nums text-fg">{dur.compact}</span>
+          {"　"}
+          {card.stratName}　士氣{card.stratCost}
+        </p>
+      </div>
+    </button>
   );
 }
 
