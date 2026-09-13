@@ -1,16 +1,21 @@
 import { SKILLS, skillById, skillCardFacts, type Card } from "@/data/catalog";
 import { cn } from "@/lib/utils";
 
+const TILE =
+  "inline-flex items-center justify-center rounded-sm border border-black bg-cost font-medium text-black";
+
 export function SkillChip({
   id,
+  compact,
+  count,
   active,
   onClick,
-  count,
 }: {
   id: number;
+  compact?: boolean;
+  count?: number;
   active?: boolean;
   onClick?: () => void;
-  count?: number;
 }) {
   const skill = SKILLS[id];
   if (!skill) return null;
@@ -20,24 +25,26 @@ export function SkillChip({
       type={onClick ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 items-center gap-1 rounded-sm border px-2 text-xs tracking-wide",
-        active ? "border-accent bg-accent text-accent-fg" : "border-border bg-surface-2 text-fg",
-        onClick && "hover:border-fg/30",
+        TILE,
+        compact ? "h-5 px-1.5 text-[10px]" : "h-6 px-2 text-xs",
+        onClick && "hover:brightness-110",
+        active && "bg-black text-cost",
       )}
     >
-      <span className="text-faint">{skill.short}</span>
       {skill.name}
-      {count != null && count > 1 ? <span className="tabular-nums text-muted">×{count}</span> : null}
+      {count != null && count > 1 ? <span className="ml-0.5 tabular-nums">×{count}</span> : null}
     </Comp>
   );
 }
 
-export function SkillList({ ids }: { ids: number[] }) {
-  if (!ids.length) return <span className="text-sm text-faint">無特技</span>;
+export function SkillList({ ids, compact }: { ids: number[]; compact?: boolean }) {
+  if (!ids.length) return <span className={cn("text-faint", compact ? "text-xs" : "text-sm")}>無特技</span>;
+  const counts = new Map<number, number>();
+  for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {ids.map((id, i) => (
-        <SkillChip key={`${id}-${i}`} id={id} />
+    <div className={cn("flex flex-wrap", compact ? "gap-1" : "gap-1.5")}>
+      {[...counts.entries()].map(([id, n]) => (
+        <SkillChip key={id} id={id} compact={compact} count={n} />
       ))}
     </div>
   );
@@ -51,9 +58,8 @@ export function SkillExplain({ id, card }: { id: number; card?: Card }) {
     : skill.facts;
   return (
     <article className="rounded-lg bg-surface-2 p-3">
-      <div className="flex flex-wrap items-baseline gap-2">
-        <h4 className="font-display text-base">{skill.name}</h4>
-        <span className="text-xs text-muted">{skill.short}</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <SkillChip id={id} />
         {skill.durationC ? (
           <span className="ml-auto text-xs tabular-nums text-fg">{skill.durationC}</span>
         ) : null}

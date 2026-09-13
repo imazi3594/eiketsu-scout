@@ -1,9 +1,9 @@
 import {
   COLOR_CLASS,
   formatCost,
-  skillNames,
   type Card,
 } from "@/data/catalog";
+import { SkillList } from "@/components/skill-chip";
 import { UnitIcon } from "@/components/unit-icon";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +62,9 @@ export function CardIdentity({ card, compact }: { card: Card; compact?: boolean 
         <span>武 {card.power}</span>
         <span>知 {card.intel}</span>
       </p>
-      <p className={cn("mt-1", compact ? "truncate text-xs text-fg" : "text-sm text-fg")}>{skillNames(card)}</p>
+      <div className={cn("mt-1.5", compact && "mt-1")}>
+        <SkillList ids={card.skills} compact={compact} />
+      </div>
     </div>
   );
 }

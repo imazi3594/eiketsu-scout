@@ -253,6 +253,8 @@ export function ScoutApp() {
                         key: String(s.id),
                         label: s.name,
                         active: skills.includes(s.id),
+                        className: "border border-black bg-black text-cost",
+                        idleClassName: "border border-black bg-cost text-black",
                         toggle: () => toggle(skills, s.id, setSkills),
                       }))}
                     />
