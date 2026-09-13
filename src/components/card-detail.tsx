@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 export function StratTitle({ card, compact }: { card: Card; compact?: boolean }) {
   const cats = displayCats(card);
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 text-right">
       <p className={cn("leading-tight text-fg", compact ? "font-medium" : "font-display text-xl")}>{card.stratName}</p>
       <p className="mt-0.5 text-xs text-muted">
         {cats.length ? `${cats.join(" · ")} · ` : null}士氣 {card.stratCost}
@@ -29,7 +29,7 @@ export function StratTitle({ card, compact }: { card: Card; compact?: boolean })
   );
 }
 
-export function CardDetail({ card, hideTitle }: { card: Card; hideTitle?: boolean }) {
+export function CardDetail({ card }: { card: Card }) {
   const duration = formatStratDuration(card);
   const konshin = konshinTiers(card);
   const kokou = konshin ? null : kokouTiers(card);
@@ -39,8 +39,7 @@ export function CardDetail({ card, hideTitle }: { card: Card; hideTitle?: boolea
 
   return (
     <div className="flex flex-col gap-4 pb-8">
-      <CardIdentity card={card} />
-      {hideTitle ? null : <StratTitle card={card} />}
+      <CardIdentity card={card} extra={<StratTitle card={card} />} />
 
       <section className="rounded-lg border border-white/10 bg-black/35 p-4">
         <div className="flex items-start justify-end gap-3">

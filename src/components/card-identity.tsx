@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   COLOR_CLASS,
   formatCost,
@@ -26,7 +27,15 @@ export function CostPips({ cost, small }: { cost: number; small?: boolean }) {
   );
 }
 
-export function CardIdentity({ card, compact }: { card: Card; compact?: boolean }) {
+export function CardIdentity({
+  card,
+  compact,
+  extra,
+}: {
+  card: Card;
+  compact?: boolean;
+  extra?: ReactNode;
+}) {
   const NameTag = compact ? "p" : "h2";
   return (
     <div className="min-w-0">
@@ -43,14 +52,17 @@ export function CardIdentity({ card, compact }: { card: Card; compact?: boolean 
         <span className="text-muted">{card.rarity}</span>
         <span className="text-faint">{card.period}</span>
       </p>
-      <NameTag
-        className={cn(
-          "mt-1 text-fg",
-          compact ? "truncate font-medium" : "font-display text-2xl leading-tight text-balance",
-        )}
-      >
-        {card.name}
-      </NameTag>
+      <div className={cn("mt-1 flex items-start gap-3", extra && "justify-between")}>
+        <NameTag
+          className={cn(
+            "min-w-0 text-fg",
+            compact ? "truncate font-medium" : "font-display text-2xl leading-tight text-balance",
+          )}
+        >
+          {card.name}
+        </NameTag>
+        {extra ? <div className="max-w-[55%] shrink-0 text-right">{extra}</div> : null}
+      </div>
       <p
         className={cn(
           "mt-1.5 flex flex-wrap items-center gap-2.5 tabular-nums",
