@@ -509,21 +509,47 @@ function durQualifier(note: string): string {
   return "";
 }
 
+function parseDurationValue(value: string): { durC: number; depC: number | null } | null {
+  const match = value.match(/(\d+(?:\.\d+)?)\s*C/);
+  if (!match) return null;
+  const dep = value.match(/知力依存[:：]\s*約?(\d+(?:\.\d+)?)C/);
+  return { durC: Number(match[1]), depC: dep ? Number(dep[1]) : null };
+}
+
+/** 本計時長：有短計時唔好用短計嗰條 効果時間。優先取主效果入面帶知力依存嘅時長。 */
+function pickMainDuration(card: Card): { durC: number | null; depC: number | null; note: string } {
+  const durs = mainEffects(card).filter((effect) => effect.label.startsWith("効果時間"));
+  const preferred =
+    durs.find((effect) => /知力依存/.test(effect.value)) ??
+    durs.find((effect) => /\d+(?:\.\d+)?\s*C/.test(effect.value) && !/自身が知力/.test(effect.value));
+  if (preferred) {
+    const parsed = parseDurationValue(preferred.value);
+    if (parsed) return { durC: parsed.durC, depC: parsed.depC ?? card.depC, note: preferred.value };
+  }
+  return { durC: card.durC, depC: card.depC, note: card.durNote };
+}
+
 export function formatStratDuration(card: Card): StratDuration {
-  const q = durQualifier(card.durNote);
+  const picked = pickMainDuration(card);
+  const q = durQualifier(picked.note);
   const hint = stratTimeNote(card.stratTime);
-  if (card.durC != null) {
-    const core = formatCount(card.durC);
+  if (picked.durC != null) {
+    const core = formatCount(picked.durC);
     const label = q ? `${core} ${q}` : core;
     const compact = q ? `${core}${q}` : core;
-    const dep = card.depC != null ? `知力依存 ${formatCount(card.depC)}／知力` : card.stratTime === "固定時間" ? "固定時長，唔跟知力" : "";
+    const dep =
+      picked.depC != null
+        ? `知力依存 ${formatCount(picked.depC)}／知力`
+        : card.stratTime === "固定時間"
+          ? "固定時長，唔跟知力"
+          : "";
     const extraBits: string[] = [];
     if (card.stratTime === "撤退するまで") extraBits.push("直至撤退");
     if (card.stratTime === "一瞬") extraBits.push("官方分類：一瞬");
     return {
       compact,
       label,
-      seconds: `約 ${countToSeconds(card.durC)} 秒`,
+      seconds: `約 ${countToSeconds(picked.durC)} 秒`,
       dep,
       extra: extraBits.join("　"),
       hint,
