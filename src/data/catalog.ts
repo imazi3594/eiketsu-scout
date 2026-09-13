@@ -539,7 +539,7 @@ export function formatStratDuration(card: Card): StratDuration {
 }
 
 export function displayEffects(card: Card): StatLine[] {
-  return effectRows(card.effects ?? []);
+  return effectRows(mainEffects(card));
 }
 
 /** 紫勢力渾身：eiketsudb 由弱至強（無→弱→強），畫面由左至右 強｜弱｜無。 */
@@ -711,7 +711,7 @@ function splitRepeatingGroups(items: CardEffect[], splitLabel: string): CardEffe
 
 export function kokouTiers(card: Card): KokouTiers | null {
   if (!isKokouCard(card)) return null;
-  const items = (card.effects ?? []).filter((e) => !skipKonshinLabel(e.label));
+  const items = mainEffects(card).filter((e) => !skipKonshinLabel(e.label));
   if (!items.length) return null;
 
   const max = parseKokouMax(card.stratDesc);
@@ -773,6 +773,107 @@ export function kokouTiers(card: Card): KokouTiers | null {
 
 export function displayArea(card: Card): string {
   return translateArea(card.area ?? "");
+}
+
+export type Tanken = {
+  name: string;
+  cost: string | null;
+  text: string;
+  rows: StatLine[];
+};
+
+function fullwidthNum(input: string): string {
+  return input.replace(/[０-９]/g, (ch) => String(ch.charCodeAt(0) - 0xff10)).replace(/．/g, ".");
+}
+
+function parseTankenBlocks(desc: string): { main: string; blocks: { name: string; cost: string | null; text: string }[] } {
+  const raw = (desc ?? "").replace(/<br\s*\/?>/gi, "\n");
+  const idx = raw.search(/短計[・･]/);
+  if (idx < 0) return { main: desc ?? "", blocks: [] };
+  const main = raw.slice(0, idx).trim();
+  const tail = raw.slice(idx);
+  const re = /短計[・･]([^【\n：:]{1,24})(?:【([^】]+)】)?\s*[：:]?\s*/g;
+  const marks: { name: string; cost: string | null; start: number; body: number }[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(tail))) {
+    marks.push({
+      name: m[1].trim(),
+      cost: m[2] ? fullwidthNum(m[2]).trim() : null,
+      start: m.index,
+      body: m.index + m[0].length,
+    });
+  }
+  const blocks = marks.map((mark, i) => ({
+    name: mark.name,
+    cost: mark.cost,
+    text: tail.slice(mark.body, i + 1 < marks.length ? marks[i + 1].start : tail.length).trim(),
+  }));
+  return { main, blocks };
+}
+
+const TANKEN_KEEP =
+  /再使用間隔|特殊効果|弾き距離|突撃距離|知力ダメージ|武力ダメージ|固定ダメージ|ダメージ係数|移動不可|ため時間|跳躍距離|兵種変化|敵城門ダメージ|ボール/;
+
+function tankenEffectIndex(effects: CardEffect[]): number {
+  let seal = -1;
+  let reuse = -1;
+  effects.forEach((effect, i) => {
+    if (effect.label === "計略封印") seal = i;
+    if (effect.label === "再使用間隔") reuse = i;
+  });
+  if (seal >= 0 && (reuse < 0 || seal < reuse)) return seal + 1;
+  if (reuse < 0) return -1;
+  let start = reuse;
+  for (let i = reuse - 1; i >= 0; i--) {
+    const lab = effects[i].label;
+    const val = effects[i].value;
+    if (lab === "計略封印") break;
+    if (lab.startsWith("効果時間") && /知力依存|撤退|旗陣形/.test(val)) break;
+    if (lab !== "効果時間" && !TANKEN_KEEP.test(lab)) break;
+    start = i;
+  }
+  return start;
+}
+
+function mainEffects(card: Card): CardEffect[] {
+  const effects = card.effects ?? [];
+  if (!parseTankenBlocks(card.stratDesc ?? "").blocks.length) return effects;
+  const idx = tankenEffectIndex(effects);
+  return idx >= 0 ? effects.slice(0, idx) : effects;
+}
+
+function tankenRows(effects: CardEffect[]): StatLine[] {
+  const rows: StatLine[] = [];
+  const seen = new Set<string>();
+  for (const effect of effects) {
+    const label = translateLabel(effect.label);
+    const value = translateValue(effect.value);
+    const key = `${label}|${value}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    rows.push({ label, value });
+  }
+  return rows;
+}
+
+export function cardTanken(card: Card): Tanken[] {
+  const { blocks } = parseTankenBlocks(card.stratDesc ?? "");
+  if (!blocks.length) return [];
+  const effects = card.effects ?? [];
+  const idx = tankenEffectIndex(effects);
+  const fx = idx >= 0 ? effects.slice(idx) : [];
+  return blocks.map((block, i) => ({
+    name: block.name,
+    cost: block.cost,
+    text: translateDesc(block.text),
+    rows: i === 0 ? tankenRows(fx) : [],
+  }));
+}
+
+export function displayMainStratDesc(card: Card): string {
+  const { main, blocks } = parseTankenBlocks(card.stratDesc ?? "");
+  if (!blocks.length) return translateDesc(card.stratDesc ?? "");
+  return translateDesc(main);
 }
 
 export function displayCats(card: Card): string[] {

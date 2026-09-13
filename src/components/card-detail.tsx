@@ -1,9 +1,10 @@
 import { ExternalLink } from "lucide-react";
 import {
+  cardTanken,
   displayArea,
   displayCats,
   displayEffects,
-  displayStratDesc,
+  displayMainStratDesc,
   formatStratDuration,
   kokouTiers,
   konshinTiers,
@@ -12,6 +13,7 @@ import {
   type KokouTiers,
   type KonshinTier,
   type StatLine,
+  type Tanken,
 } from "@/data/catalog";
 import { Button } from "@/components/ui/button";
 import { CardIdentity } from "@/components/card-identity";
@@ -35,7 +37,8 @@ export function CardDetail({ card }: { card: Card }) {
   const kokou = konshin ? null : kokouTiers(card);
   const effects = konshin || kokou ? [] : displayEffects(card);
   const area = displayArea(card);
-  const desc = displayStratDesc(card);
+  const desc = displayMainStratDesc(card);
+  const tankens = cardTanken(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
   const hasData = Boolean(konshin || kokou || effects.length || area || duration.label);
 
@@ -77,6 +80,10 @@ export function CardDetail({ card }: { card: Card }) {
         </section>
       ) : null}
 
+      {tankens.map((tanken) => (
+        <TankenBox key={tanken.name} tanken={tanken} />
+      ))}
+
       <div className="flex gap-2">
         <Button variant="ghost" asChild>
           <a href={officialUrl(card)} target="_blank" rel="noreferrer">
@@ -94,6 +101,18 @@ export function CardDetail({ card }: { card: Card }) {
         ) : null}
       </div>
     </div>
+  );
+}
+
+function TankenBox({ tanken }: { tanken: Tanken }) {
+  return (
+    <section className="rounded-lg border border-white/10 bg-black/35 p-4">
+      <p className="text-xs text-faint">短計</p>
+      <p className="mt-1 font-display text-xl leading-tight text-fg">{tanken.name}</p>
+      {tanken.cost ? <p className="mt-0.5 text-xs text-muted">士氣 {tanken.cost}</p> : null}
+      {tanken.text ? <p className="mt-3 text-sm leading-relaxed text-pretty text-fg">{tanken.text}</p> : null}
+      {tanken.rows.length ? <EffectList rows={tanken.rows} /> : null}
+    </section>
   );
 }
 
