@@ -308,7 +308,11 @@ export function ScoutApp() {
                 </button>
                 <p className="min-w-0 flex-1 truncate text-xs tabular-nums text-faint">{resultLabel}</p>
                 {layerActive ? (
-                  <button type="button" className="h-8 shrink-0 text-xs text-muted hover:text-fg" onClick={clearFilters}>
+                  <button
+                    type="button"
+                    className="flex h-8 shrink-0 items-center rounded-md bg-faction-hi px-2.5 text-xs font-medium text-white"
+                    onClick={clearFilters}
+                  >
                     清除
                   </button>
                 ) : null}
