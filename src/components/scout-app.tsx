@@ -436,7 +436,7 @@ export function ScoutApp() {
                 <div className="absolute inset-0">
                   <HomeWash />
                   <p className="relative z-10 px-6 pt-16 text-center text-sm leading-relaxed text-pretty text-muted">
-                    打個名、卡號或計略就查。
+                    可以用篩選，或打個名、卡號或計略名其中一個字就可以查。
                   </p>
                 </div>
               ) : (
