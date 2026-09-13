@@ -5,7 +5,6 @@ import {
   CARDS,
   COLOR_BAR,
   COLOR_CLASS,
-  COLOR_INK,
   COLORS,
   COSTS,
   formatCost,
@@ -349,8 +348,8 @@ export function ScoutApp() {
                     key: c,
                     label: c,
                     active: colors.includes(c),
-                    className: COLOR_CLASS[c],
-                    idleClassName: cn("bg-surface-2", COLOR_INK[c]),
+                    className: cn(COLOR_BAR[c], "text-fg ring-2 ring-inset ring-fg"),
+                    idleClassName: cn(COLOR_BAR[c], "text-fg opacity-45"),
                     toggle: () => toggle(colors, c, setColors),
                   }))}
                 />
