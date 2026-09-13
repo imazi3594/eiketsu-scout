@@ -361,6 +361,8 @@ export function ScoutApp() {
                         key: String(c),
                         label: <CostPips cost={c} small stacked />,
                         active: costs.includes(c),
+                        className: "bg-surface-2 text-fg ring-2 ring-inset ring-fg",
+                        idleClassName: "bg-surface-2",
                         ariaLabel: `${formatCost(c)} cost`,
                         toggle: () => toggle(costs, c, setCosts),
                       }))}
