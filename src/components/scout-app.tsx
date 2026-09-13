@@ -255,6 +255,15 @@ export function ScoutApp() {
                   ref={inputRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      inputRef.current?.blur();
+                    }
+                  }}
+                  type="search"
+                  enterKeyHint="search"
+                  inputMode="search"
                   placeholder="織田信長、蒼173、指揮、伏兵…"
                   className="pl-10 pr-10"
                   autoComplete="off"
