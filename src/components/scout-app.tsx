@@ -333,16 +333,6 @@ export function ScoutApp() {
                     toggle: () => toggle(colors, c, setColors),
                   }))}
                 />
-                <FilterRule label="時代" />
-                <ChipGrid
-                  cols="grid-cols-5"
-                  items={PERIODS.map((p) => ({
-                    key: p,
-                    label: p,
-                    active: periods.includes(p),
-                    toggle: () => toggle(periods, p, setPeriods),
-                  }))}
-                />
                 <div className="flex min-w-0 flex-col gap-1">
                     <FilterRule label="成本" />
                     <ChipGrid
@@ -376,12 +366,22 @@ export function ScoutApp() {
                     className="h-8 text-xs text-muted hover:text-fg"
                     onClick={() => setMoreFilters((v) => !v)}
                   >
-                    特技／稀有{skills.length + rarities.length ? ` ${skills.length + rarities.length}` : ""}
+                    更多篩選{periods.length + skills.length + rarities.length ? ` ${periods.length + skills.length + rarities.length}` : ""}
                   </button>
                 </div>
 
                 {moreFilters ? (
                   <div className="flex flex-col gap-1 overflow-x-hidden pb-1">
+                    <FilterRule label="時代" />
+                    <ChipGrid
+                      cols="grid-cols-5"
+                      items={PERIODS.map((p) => ({
+                        key: p,
+                        label: p,
+                        active: periods.includes(p),
+                        toggle: () => toggle(periods, p, setPeriods),
+                      }))}
+                    />
                     <FilterRule label="特技" />
                     <ChipGrid
                       cols="grid-cols-4 sm:grid-cols-6"
