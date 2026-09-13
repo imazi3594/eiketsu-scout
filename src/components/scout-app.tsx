@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Search, X, Zap } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Info, Search, X, Zap } from "lucide-react";
 import {
   CARD_BY_ID,
-  CARD_COUNT,
   CARDS,
   COLOR_BAR,
   COLOR_CLASS,
@@ -25,10 +24,11 @@ import { CardDetail } from "@/components/card-detail";
 import { CardThemeBackdrop } from "@/components/card-theme";
 import { CardIdentity, CostPips } from "@/components/card-identity";
 import { UnitIcon } from "@/components/unit-icon";
+import { AboutPage } from "@/components/about-page";
 import { SkillExplain } from "@/components/skill-chip";
 import { cn } from "@/lib/utils";
 
-type Tab = "search" | "skills";
+type Tab = "search" | "skills" | "about";
 
 export function ScoutApp() {
   const [tab, setTab] = useState<Tab>("search");
@@ -108,7 +108,18 @@ export function ScoutApp() {
               <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦 速查</h1>
             </div>
           </div>
-          <p className="hidden text-xs tabular-nums text-faint sm:block">{CARD_COUNT} 張</p>
+          <button
+            type="button"
+            onClick={() => setTab("about")}
+            className={cn(
+              "rounded-md p-2",
+              tab === "about" ? "text-cost" : "text-muted hover:bg-surface-2 hover:text-fg",
+            )}
+            aria-label="關於"
+            aria-current={tab === "about" ? "page" : undefined}
+          >
+            <Info className="size-5" />
+          </button>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 px-4 sm:px-6">
           <TabBtn id="search" tab={tab} setTab={setTab} icon={<Search className="size-4" />} label="速查" />
@@ -116,7 +127,9 @@ export function ScoutApp() {
         </nav>
       </header>
 
-      {tab === "skills" ? (
+      {tab === "about" ? (
+        <AboutPage />
+      ) : tab === "skills" ? (
         <main className="mx-auto w-full max-w-3xl min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
           <p className="text-sm leading-relaxed text-pretty text-muted">
             1C＝2.4 秒，全場 99C。下面係各特技嘅持續／成本換算。計略嘅具體 C 數喺武將詳情。

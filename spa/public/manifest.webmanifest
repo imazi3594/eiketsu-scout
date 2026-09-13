@@ -1,0 +1,26 @@
+{
+  "name": "英傑大戦 速查",
+  "short_name": "英傑速查",
+  "description": "對戰時查計略時長（C）同效果值。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0b0a",
+  "theme_color": "#0c0b0a",
+  "lang": "zh-Hant",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
