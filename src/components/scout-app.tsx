@@ -212,30 +212,15 @@ export function ScoutApp() {
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-bg text-fg">
       <header className="shrink-0 border-b border-border bg-bg">
-        <div className="mx-auto flex max-w-6xl items-end justify-between gap-4 px-4 py-2.5 sm:px-6 sm:pb-3 sm:pt-5">
-          <div>
-            <p className="hidden text-xs tracking-widest text-faint sm:block">EIKETSU TAISEN</p>
-            <div className="flex items-center gap-2">
-              <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦⚡️速查</h1>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => goTab("about")}
-            className={cn(
-              "rounded-md p-2",
-              tab === "about" ? "text-cost" : "text-muted hover:bg-surface-2 hover:text-fg",
-            )}
-            aria-label="關於"
-            aria-current={tab === "about" ? "page" : undefined}
-          >
-            <Info className="size-5" />
-          </button>
+        <div className="mx-auto max-w-6xl px-4 py-2.5 sm:px-6 sm:pb-3 sm:pt-5">
+          <p className="hidden text-xs tracking-widest text-faint sm:block">EIKETSU TAISEN</p>
+          <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦⚡️速查</h1>
         </div>
-        <nav className="mx-auto flex max-w-6xl gap-1 px-4 sm:px-6">
+        <nav className="mx-auto flex max-w-6xl gap-0 px-2 sm:gap-1 sm:px-6">
           <TabBtn id="search" tab={tab} setTab={goTab} icon={<Search className="size-4" />} label="速查" />
           <TabBtn id="skills" tab={tab} setTab={goTab} icon={<BookOpen className="size-4" />} label="特技" />
           <TabBtn id="recents" tab={tab} setTab={goTab} icon={<Clock className="size-4" />} label="最近" />
+          <TabBtn id="about" tab={tab} setTab={goTab} icon={<Info className="size-4" />} label="關於" />
         </nav>
       </header>
 
@@ -582,7 +567,7 @@ function TabBtn({
       type="button"
       onClick={() => setTab(id)}
       className={cn(
-        "flex h-10 items-center gap-2 border-b-2 px-3 text-sm sm:h-11",
+        "flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 border-b-2 px-1.5 text-sm sm:h-11 sm:flex-none sm:px-3",
         active ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg",
       )}
     >
