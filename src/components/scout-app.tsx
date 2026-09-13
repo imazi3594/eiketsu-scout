@@ -197,7 +197,8 @@ export function ScoutApp() {
     .filter(Boolean)
     .join(" · ");
 
-  const clearFilters = () => {
+  const clearAll = () => {
+    setQuery("");
     setColors([]);
     setCosts([]);
     setUnits([]);
@@ -323,15 +324,13 @@ export function ScoutApp() {
                   {filtersOpen ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
                 </button>
                 <p className="min-w-0 flex-1 truncate text-xs tabular-nums text-faint">{resultLabel}</p>
-                {layerActive ? (
-                  <button
-                    type="button"
-                    className="flex h-8 shrink-0 items-center rounded-md bg-faction-hi px-2.5 text-xs font-medium text-white"
-                    onClick={clearFilters}
-                  >
-                    清除
-                  </button>
-                ) : null}
+                <button
+                  type="button"
+                  className="flex h-8 shrink-0 items-center rounded-md bg-faction-hi px-2.5 text-xs font-medium text-white"
+                  onClick={clearAll}
+                >
+                  清除
+                </button>
               </div>
 
               <div
