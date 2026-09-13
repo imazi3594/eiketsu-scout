@@ -434,10 +434,10 @@ const GRAMMAR: [string, string][] = [
   ["城に戻れなくする", "令對方無法歸城"],
   ["最も武力の高い味方を城に戻す", "送武力最高友軍回城"],
   ["弾を1発装填する", "装填 1 發"],
-  ["特技「気合」の効果が上がる", "特技「氣合」效果提升"],
+  ["特技「気合」の効果が上がる", "特技「気合」效果提升"],
   ["特技「忍」の効果が上がる", "特技「忍」效果提升"],
-  ["特技「狙撃」の効果が上がる", "特技「狙擊」效果提升"],
-  ["特技「狙撃」を得る", "獲得特技「狙擊」"],
+  ["特技「狙撃」の効果が上がる", "特技「狙撃」效果提升"],
+  ["特技「狙撃」を得る", "獲得特技「狙撃」"],
   ["特技「鬼」が常に発動する", "特技「鬼」常時發動"],
   ["姿が見えない", "睇唔到外形"],
   ["姿が見えなくなる", "睇唔到外形"],
@@ -639,12 +639,12 @@ const CATS: Record<string, string> = {
   琥煌: "琥煌",
   短計: "短計",
   渾身: "渾身",
-  黄熾: "黃熾",
+  黄熾: "黄熾",
   拠点: "據點",
   ため計略: "蓄力計略",
   旗陣形: "旗陣形",
   復活: "復活",
-  舞い: "舞",
+  舞い: "舞い",
   式神: "式神",
   詠歌: "詠歌",
   反計: "反計",
@@ -665,12 +665,65 @@ function toTraditional(input: string): string {
   return out;
 }
 
+const PROPER = [
+  "気合",
+  "狙撃",
+  "疾駆",
+  "覇気",
+  "伏兵",
+  "防柵",
+  "復活",
+  "忍",
+  "昂揚",
+  "技巧",
+  "先陣",
+  "鬼",
+  "大兵",
+  "同盟",
+  "槍術",
+  "黄熾",
+  "宿星",
+  "渾身",
+  "琥煌",
+  "剣豪",
+  "鉄砲隊",
+  "騎兵",
+  "槍兵",
+  "弓兵",
+  "戦国",
+  "江戸･幕末",
+  "三国志",
+  "春秋戦国",
+  "黄勢",
+];
+
+function protectProper(s: string): { text: string; slots: string[] } {
+  const slots: string[] = [];
+  let text = s;
+  for (const name of [...PROPER].sort((a, b) => b.length - a.length)) {
+    if (!text.includes(name)) continue;
+    const token = `§P${slots.length}§`;
+    text = text.split(name).join(token);
+    slots.push(name);
+  }
+  return { text, slots };
+}
+
+function restoreProper(s: string, slots: string[]): string {
+  let text = s;
+  slots.forEach((name, i) => {
+    text = text.split(`§P${i}§`).join(name);
+  });
+  return text;
+}
+
 export function localizeJp(input: string): string {
   if (!input) return "";
   let s = input.replace(/▲/g, "↑").replace(/▼/g, "↓").replace(/◆/g, "").replace(/◇/g, "※ ");
   s = s.replace(/（/g, "(").replace(/）/g, ")");
   s = applyPairs(s, [...GRAMMAR, ...PHRASES]);
-  s = toTraditional(s);
+  const held = protectProper(s);
+  s = toTraditional(held.text);
   s = applyPairs(s, YUE_AFTER);
   s = s.replace(/の/g, "嘅");
   s = s.replace(/[がをはもへ]/g, "");
@@ -678,6 +731,7 @@ export function localizeJp(input: string): string {
   s = s.replace(/と/g, "同");
   s = s.replace(/で/g, "用");
   s = s.replace(/[\u3040-\u309F\u30A0-\u30FF]+/g, "");
+  s = restoreProper(s, held.slots);
   s = s.replace(/，、/g, "，").replace(/。。/g, "。");
   s = s.replace(/嘅嘅/g, "嘅").replace(/同同/g, "同");
   s = s.replace(/\s+/g, " ").trim();
@@ -721,7 +775,7 @@ export function translateDesc(desc: string): string {
   s = s.replace(/【琥煌：最多食[0-9]劍】\s*(\([^)]*\))?\s*/g, "");
   s = s.replace(/【渾身】\s*(\([^)]*\))?\s*/g, "");
   s = s.replace(/【陣形】\s*(\([^)]*\))?\s*/g, "【陣形】");
-  s = s.replace(/【舞】\s*(\([^)]*\))?\s*/g, "【舞】");
+  s = s.replace(/【舞い】\s*(\([^)]*\))?\s*/g, "【舞い】");
   s = s.replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").trim();
   return s;
 }

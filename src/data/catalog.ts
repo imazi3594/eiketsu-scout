@@ -182,7 +182,7 @@ export const SKILLS: SkillDef[] = [
   },
   {
     id: 4,
-    name: "氣合",
+    name: "気合",
     short: "気",
     official: "通常の戦闘で受けたダメージの一部を一定時間ごとに回復します。",
     detail:
@@ -197,7 +197,7 @@ export const SKILLS: SkillDef[] = [
   },
   {
     id: 5,
-    name: "狙擊",
+    name: "狙撃",
     short: "狙",
     official: "同じ射撃対象を一定時間ロックオンし続けることで、コストに応じてより強力な射撃を行える狙撃状態になります。",
     detail:
@@ -276,7 +276,7 @@ export const SKILLS: SkillDef[] = [
   },
   {
     id: 10,
-    name: "疾驅",
+    name: "疾駆",
     short: "疾",
     official: "兵種に応じて移動速度が上がります。",
     detail: "依兵種提高移動速度。騎兵加幅較細，其他兵種較明顯。",
@@ -348,7 +348,7 @@ export const SKILLS: SkillDef[] = [
   },
   {
     id: 15,
-    name: "霸氣",
+    name: "覇気",
     short: "覇",
     official: "武将コストに応じて覇気が溜まる量が増え、特技「覇気」を持つ武将の武将コスト合計に応じて英傑呼応のダメージが上がります。",
     detail: "加快霸氣累積，並依「覇気」持有武將成本合計提高英傑呼應（攻城呼應）傷害。推城威脅明顯。",
