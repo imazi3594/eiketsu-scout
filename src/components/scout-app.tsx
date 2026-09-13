@@ -32,6 +32,21 @@ import { initInstallCapture } from "@/lib/install";
 initInstallCapture();
 
 type Tab = "search" | "skills" | "about";
+type Hist =
+  | { v: "root" }
+  | { v: "home" }
+  | { v: "card"; id: string }
+  | { v: "skills" }
+  | { v: "about" }
+  | { v: "filters" };
+
+function histOf(tab: Tab, selectedId: string | null, filtersOpen: boolean): Hist {
+  if (tab === "about") return { v: "about" };
+  if (tab === "skills") return { v: "skills" };
+  if (selectedId) return { v: "card", id: selectedId };
+  if (filtersOpen) return { v: "filters" };
+  return { v: "home" };
+}
 
 export function ScoutApp() {
   const [tab, setTab] = useState<Tab>("search");
@@ -54,6 +69,60 @@ export function ScoutApp() {
   const select = useScout((s) => s.select);
   const recents = useScout((s) => s.recents);
   const selected = selectedId ? CARD_BY_ID[selectedId] : null;
+  const fromPop = useRef(false);
+  const lastBack = useRef(0);
+  const [exitHint, setExitHint] = useState(false);
+
+  function pushView(next: Hist) {
+    if (fromPop.current) return;
+    const cur = (history.state ?? { v: "home" }) as Hist;
+    if (cur.v === next.v && (next.v !== "card" || (cur.v === "card" && cur.id === next.id))) return;
+    history.pushState(next, "");
+  }
+
+  function applyHist(state: Hist | null) {
+    const s = state ?? { v: "home" as const };
+    if (s.v === "about") {
+      setTab("about");
+      select(null);
+      setFiltersOpen(false);
+      return;
+    }
+    if (s.v === "skills") {
+      setTab("skills");
+      select(null);
+      setFiltersOpen(false);
+      return;
+    }
+    setTab("search");
+    if (s.v === "card") {
+      select(s.id);
+      setFiltersOpen(false);
+      return;
+    }
+    select(null);
+    setFiltersOpen(s.v === "filters");
+  }
+
+  const applyHistRef = useRef(applyHist);
+  applyHistRef.current = applyHist;
+
+  function goTab(next: Tab) {
+    if (next === tab) {
+      if (next === "search" && selectedId) {
+        const cur = history.state as Hist | null;
+        if (cur?.v === "card") history.back();
+        else {
+          select(null);
+          pushView({ v: filtersOpen ? "filters" : "home" });
+        }
+      }
+      return;
+    }
+    setTab(next);
+    if (next !== "search") select(null);
+    pushView(histOf(next, null, false));
+  }
 
   useEffect(() => {
     void Promise.resolve(useScout.persist.rehydrate());
@@ -61,7 +130,40 @@ export function ScoutApp() {
     const apply = () => setIsDesktop(mq.matches);
     apply();
     mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
+
+    history.replaceState({ v: "root" } satisfies Hist, "");
+    history.pushState({ v: "home" } satisfies Hist, "");
+
+    const onPop = (event: PopStateEvent) => {
+      const s = (event.state ?? { v: "root" }) as Hist;
+      if (s.v === "root") {
+        const now = Date.now();
+        if (now - lastBack.current < 2000) {
+          history.back();
+          return;
+        }
+        lastBack.current = now;
+        setExitHint(true);
+        window.setTimeout(() => setExitHint(false), 2000);
+        history.pushState({ v: "home" } satisfies Hist, "");
+        fromPop.current = true;
+        applyHistRef.current({ v: "home" });
+        queueMicrotask(() => {
+          fromPop.current = false;
+        });
+        return;
+      }
+      fromPop.current = true;
+      applyHistRef.current(s);
+      queueMicrotask(() => {
+        fromPop.current = false;
+      });
+    };
+    window.addEventListener("popstate", onPop);
+    return () => {
+      mq.removeEventListener("change", apply);
+      window.removeEventListener("popstate", onPop);
+    };
   }, []);
 
   const layerActive = colors.length + costs.length + units.length + periods.length + skills.length + rarities.length;
@@ -113,7 +215,7 @@ export function ScoutApp() {
           </div>
           <button
             type="button"
-            onClick={() => setTab("about")}
+            onClick={() => goTab("about")}
             className={cn(
               "rounded-md p-2",
               tab === "about" ? "text-cost" : "text-muted hover:bg-surface-2 hover:text-fg",
@@ -125,8 +227,8 @@ export function ScoutApp() {
           </button>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 px-4 sm:px-6">
-          <TabBtn id="search" tab={tab} setTab={setTab} icon={<Search className="size-4" />} label="速查" />
-          <TabBtn id="skills" tab={tab} setTab={setTab} icon={<BookOpen className="size-4" />} label="特技" />
+          <TabBtn id="search" tab={tab} setTab={goTab} icon={<Search className="size-4" />} label="速查" />
+          <TabBtn id="skills" tab={tab} setTab={goTab} icon={<BookOpen className="size-4" />} label="特技" />
         </nav>
       </header>
 
@@ -181,7 +283,16 @@ export function ScoutApp() {
                 <button
                   type="button"
                   className="flex h-8 shrink-0 items-center gap-0.5 rounded-md bg-surface-2 px-2.5 text-xs text-fg lg:hidden"
-                  onClick={() => setFiltersOpen((v) => !v)}
+                  onClick={() => {
+                    if (filtersOpen) {
+                      const cur = history.state as Hist | null;
+                      if (cur?.v === "filters") history.back();
+                      else setFiltersOpen(false);
+                    } else {
+                      setFiltersOpen(true);
+                      pushView({ v: "filters" });
+                    }
+                  }}
                   aria-expanded={filtersOpen}
                 >
                   篩選
@@ -303,7 +414,10 @@ export function ScoutApp() {
                     <li key={card.id}>
                       <button
                         type="button"
-                        onClick={() => select(card.id)}
+                        onClick={() => {
+                          select(card.id);
+                          pushView({ v: "card", id: card.id });
+                        }}
                         className={cn(
                           "flex w-full items-start gap-3 rounded-lg px-2 py-2.5 text-left transition-colors duration-[var(--motion-quick)]",
                           active ? "bg-surface-2" : "hover:bg-surface",
@@ -343,12 +457,22 @@ export function ScoutApp() {
         </div>
       )}
 
+      {exitHint ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-[70] flex justify-center px-4">
+          <p className="rounded-full bg-black/85 px-4 py-2 text-sm text-fg shadow-[var(--shadow-border)]">再按一次關閉程式</p>
+        </div>
+      ) : null}
+
       {selected && tab === "search" && !isDesktop ? (
         <div className="absolute inset-0 z-50 flex min-h-0 flex-col bg-bg">
           <CardThemeBackdrop card={selected} />
           <button
             type="button"
-            onClick={() => select(null)}
+            onClick={() => {
+              const cur = history.state as Hist | null;
+              if (cur?.v === "card") history.back();
+              else select(null);
+            }}
             className="absolute right-2 top-[max(0.35rem,env(safe-area-inset-top))] z-20 rounded-md p-2 text-muted hover:bg-surface-2 hover:text-fg"
             aria-label="關閉"
           >
