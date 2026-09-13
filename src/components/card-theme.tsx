@@ -37,7 +37,7 @@ export function CardThemeBackdrop({ card }: { card: Card }) {
       />
       <UnitIcon
         unit={card.unit}
-        className="absolute -right-8 -bottom-6 size-[min(22rem,85vw)] opacity-[0.22] lg:-right-10 lg:size-[24rem]"
+        className="absolute -right-8 -bottom-6 size-[min(16rem,70vw)] opacity-[0.18] lg:-right-10 lg:size-[24rem] lg:opacity-[0.22]"
         style={{ color, transform: `rotate(${rotate})` } satisfies CSSProperties}
       />
     </div>

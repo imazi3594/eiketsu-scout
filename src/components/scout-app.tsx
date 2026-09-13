@@ -21,7 +21,6 @@ import {
 import { filterCards, searchCards } from "@/lib/search";
 import { useScout } from "@/lib/store";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { CardDetail } from "@/components/card-detail";
 import { CardThemeBackdrop } from "@/components/card-theme";
 import { CardIdentity, CostPips } from "@/components/card-identity";
@@ -41,7 +40,9 @@ export function ScoutApp() {
   const [costs, setCosts] = useState<number[]>([]);
   const [moreFilters, setMoreFilters] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   const query = useScout((s) => s.query);
@@ -97,7 +98,7 @@ export function ScoutApp() {
       : "";
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-bg text-fg">
+    <div className="relative flex h-dvh flex-col overflow-hidden bg-bg text-fg">
       <header className="shrink-0 border-b border-border bg-bg">
         <div className="mx-auto flex max-w-6xl items-end justify-between gap-4 px-4 py-2.5 sm:px-6 sm:pb-3 sm:pt-5">
           <div>
@@ -324,15 +325,24 @@ export function ScoutApp() {
         </div>
       )}
 
-      <Sheet open={Boolean(selected) && tab === "search" && !isDesktop} onOpenChange={(o) => !o && select(null)}>
-        <SheetContent side="bottom" className="relative overflow-hidden bg-bg lg:hidden">
-          {selected ? <CardThemeBackdrop card={selected} /> : null}
-          <SheetHeader className="relative z-10 p-3 pb-0 pr-12">
-            <SheetTitle className="sr-only">{selected?.name ?? "武將"}</SheetTitle>
-          </SheetHeader>
-          <div className="relative z-10 overflow-y-auto px-4">{selected ? <CardDetail card={selected} /> : null}</div>
-        </SheetContent>
-      </Sheet>
+      {selected && tab === "search" && !isDesktop ? (
+        <div className="absolute inset-0 z-50 flex min-h-0 flex-col bg-bg">
+          <CardThemeBackdrop card={selected} />
+          <div className="relative z-10 flex shrink-0 items-center justify-end px-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+            <button
+              type="button"
+              onClick={() => select(null)}
+              className="rounded-md p-2 text-muted hover:bg-surface-2 hover:text-fg"
+              aria-label="關閉"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+          <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <CardDetail card={selected} />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

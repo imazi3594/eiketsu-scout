@@ -30,7 +30,7 @@ export function CardDetail({ card }: { card: Card }) {
     <div className="flex flex-col gap-4 pb-8">
       <CardIdentity card={card} />
 
-      <section className="rounded-lg border border-white/10 bg-surface/55 p-4 backdrop-blur-[2px]">
+      <section className="rounded-lg border border-white/10 bg-black/35 p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-display text-xl leading-tight">{card.stratName}</p>
@@ -179,16 +179,16 @@ function KokouGrid({ data }: { data: KokouTiers }) {
         </div>
       ) : null}
 
-      <div className="mt-2 overflow-x-auto">
-        <table className="w-full min-w-0 table-fixed border-separate border-spacing-0 text-center">
+      <div className="mt-2 -mx-1 overflow-x-auto overscroll-x-contain">
+        <table className="w-max min-w-full border-separate border-spacing-0 text-center">
           <thead>
             <tr>
-              <th className="w-10 px-0.5 pb-1 text-left text-[10px] font-normal text-faint">劍</th>
+              <th className="sticky left-0 w-10 bg-bg/80 px-0.5 pb-1 text-left text-[10px] font-normal text-faint">劍</th>
               {data.cols.map((col) => (
                 <th
                   key={col.id}
                   className={cn(
-                    "px-0.5 pb-1 text-[10px] font-medium",
+                    "min-w-11 px-1 pb-1 text-[10px] font-medium",
                     col.highlight ? "rounded-t-md bg-faction-ko/30 text-fg" : "text-muted",
                   )}
                 >
@@ -201,7 +201,7 @@ function KokouGrid({ data }: { data: KokouTiers }) {
           <tbody>
             {compactLabels.map((label) => (
               <tr key={label}>
-                <th className="px-0.5 py-1 text-left text-[10px] font-normal leading-tight text-faint">{label}</th>
+                <th className="sticky left-0 bg-bg/80 px-0.5 py-1 text-left text-[10px] font-normal leading-tight text-faint">{label}</th>
                 {data.cols.map((col) => {
                   const value = col.rows
                     .filter((r) => r.label === label)
