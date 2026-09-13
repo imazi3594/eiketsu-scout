@@ -27,6 +27,9 @@ import { UnitIcon } from "@/components/unit-icon";
 import { AboutPage } from "@/components/about-page";
 import { SkillExplain } from "@/components/skill-chip";
 import { cn } from "@/lib/utils";
+import { initInstallCapture } from "@/lib/install";
+
+initInstallCapture();
 
 type Tab = "search" | "skills" | "about";
 

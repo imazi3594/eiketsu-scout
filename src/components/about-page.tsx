@@ -1,46 +1,58 @@
 import { useEffect, useState } from "react";
-import { Download, Share, Smartphone, Zap } from "lucide-react";
+import { Copy, Download, Share, Smartphone, Zap } from "lucide-react";
 import { CARD_COUNT } from "@/data/catalog";
+import { deviceKind, isStandalone, subscribeInstall, type BeforeInstall } from "@/lib/install";
 
-type BeforeInstall = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
+const PAGE_URL = "https://imazi3594.github.io/eiketsu-scout/";
 
 export function AboutPage() {
   const [installEvent, setInstallEvent] = useState<BeforeInstall | null>(null);
   const [installed, setInstalled] = useState(false);
   const [ios, setIos] = useState(false);
+  const [iosChrome, setIosChrome] = useState(false);
+  const [android, setAndroid] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [hint, setHint] = useState("");
 
   useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
-    setInstalled(standalone);
-    setIos(/iPhone|iPad|iPod/i.test(navigator.userAgent) && !standalone);
-
-    const onPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallEvent(event as BeforeInstall);
-    };
-    const onInstalled = () => {
-      setInstalled(true);
-      setInstallEvent(null);
-    };
-    window.addEventListener("beforeinstallprompt", onPrompt);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onPrompt);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
+    setInstalled(isStandalone());
+    const kind = deviceKind();
+    setIos(kind.ios);
+    setIosChrome(kind.iosChrome);
+    setAndroid(kind.android);
+    return subscribeInstall(setInstallEvent);
   }, []);
 
   async function install() {
-    if (!installEvent) return;
-    await installEvent.prompt();
-    const { outcome } = await installEvent.userChoice;
-    if (outcome === "accepted") setInstalled(true);
-    setInstallEvent(null);
+    if (installEvent) {
+      await installEvent.prompt();
+      const { outcome } = await installEvent.userChoice;
+      if (outcome === "accepted") setInstalled(true);
+      return;
+    }
+    if (iosChrome) {
+      setHint("iPhone 嘅 Chrome 裝完一定有地址欄。要無 toolbar，請用 Safari 打開再加到主畫面。");
+      return;
+    }
+    if (ios) {
+      setHint("撳底欄分享掣，再揀「加到主畫面」。唔好用 Chrome。");
+      return;
+    }
+    if (android) {
+      setHint("Chrome 右上 ⋮ → 揀「安裝應用程式」。唔好揀「加到主畫面」，嗰個會留住地址欄。");
+      return;
+    }
+    setHint("用 Chrome 右上 ⋮ →「安裝應用程式」。");
+  }
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(PAGE_URL);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setHint(PAGE_URL);
+    }
   }
 
   return (
@@ -67,10 +79,10 @@ export function AboutPage() {
       <section className="mt-6 rounded-lg border border-white/10 bg-black/35 p-4">
         <p className="flex items-center gap-2 text-xs text-faint">
           <Smartphone className="size-3.5" />
-          裝去主畫面
+          裝成獨立 App（冇地址欄）
         </p>
         {installed ? (
-          <p className="mt-3 text-sm text-fg">已經裝咗。之後由主畫面開就得，唔使行瀏覽器。</p>
+          <p className="mt-3 text-sm text-fg">而家已經係獨立畫面。之後由主畫面個閃電 icon 開就得。</p>
         ) : (
           <>
             <button
@@ -81,7 +93,30 @@ export function AboutPage() {
               <Download className="size-4" />
               安裝到手機
             </button>
-            {ios ? (
+            {hint ? <p className="mt-3 text-sm leading-relaxed text-pretty text-fg">{hint}</p> : null}
+
+            {iosChrome ? (
+              <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted">
+                <p className="text-fg">iPhone Chrome 唔可以隱藏 toolbar。請改用 Safari：</p>
+                <button
+                  type="button"
+                  onClick={() => void copyLink()}
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-surface-2 text-fg"
+                >
+                  <Copy className="size-4" />
+                  {copied ? "已複製網址" : "複製網址"}
+                </button>
+                <ol className="list-decimal space-y-2 pl-5">
+                  <li>打開 Safari，貼上網址</li>
+                  <li>
+                    撳底欄
+                    <Share className="mx-1 inline size-3.5 align-[-2px]" />
+                    分享
+                  </li>
+                  <li>揀「加到主畫面」→「加入」</li>
+                </ol>
+              </div>
+            ) : ios ? (
               <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-muted">
                 <li>
                   撳 Safari 底欄
@@ -89,14 +124,12 @@ export function AboutPage() {
                   分享
                 </li>
                 <li>向上滑，揀「加到主畫面」</li>
-                <li>右上角「加入」</li>
+                <li>右上角「加入」。主畫面個閃電 icon 開就冇地址欄。</li>
               </ol>
-            ) : !installEvent ? (
-              <p className="mt-3 text-sm leading-relaxed text-muted">
-                如果掣撳唔到，用 Chrome 右上選單 →「安裝應用程式」／「加到主畫面」。
-              </p>
             ) : (
-              <p className="mt-3 text-sm text-muted">撳上面就會彈系統安裝確認。</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                Android Chrome 要揀「安裝應用程式」，唔好揀「加到主畫面」——後者會留住 browser toolbar。
+              </p>
             )}
           </>
         )}
