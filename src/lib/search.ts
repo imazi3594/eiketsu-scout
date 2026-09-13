@@ -3,6 +3,7 @@ import { CARDS, SKILLS, type Card, type ColorName } from "@/data/catalog";
 const VARIANT: Record<string, string> = {
   戰: "戦",
   國: "国",
+  驅: "駆",
   氣: "気",
   劍: "剣",
   擊: "撃",

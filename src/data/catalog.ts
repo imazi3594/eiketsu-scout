@@ -10,15 +10,11 @@ export type CardEffect = { label: string; value: string };
 
 export type Card = {
   id: string;
-  img: string;
   no: string;
   name: string;
   kana: string;
   color: ColorName;
   period: string;
-  pack: string;
-  tag: string;
-  type: string;
   cost: number;
   rarity: Rarity;
   unit: UnitName;
@@ -31,7 +27,6 @@ export type Card = {
   stratDesc: string;
   stratCats: string[];
   stratTime: string;
-  stratRange: string;
   durC: number | null;
   depC: number | null;
   durNote: string;
@@ -76,6 +71,16 @@ export type StratDuration = {
 export const COLORS: ColorName[] = ["蒼", "緋", "碧", "玄", "紫", "琥", "黄"];
 export const UNITS: UnitName[] = ["騎兵", "槍兵", "弓兵", "剣豪", "鉄砲隊"];
 export const PERIODS = ["戦国", "江戸･幕末", "三国志", "平安", "中世", "春秋戦国", "古代", "特殊"];
+export const PERIOD_LABEL: Record<string, string> = {
+  戦国: "戰國",
+  "江戸･幕末": "江戶・幕末",
+  三国志: "三國志",
+  平安: "平安",
+  中世: "中世",
+  春秋戦国: "春秋戰國",
+  古代: "古代",
+  特殊: "特殊",
+};
 export const RARITIES: Rarity[] = ["N", "R", "SR", "ER"];
 export const COSTS = [1, 1.5, 2, 2.5, 3, 3.5, 4];
 
@@ -177,7 +182,7 @@ export const SKILLS: SkillDef[] = [
   },
   {
     id: 4,
-    name: "気合",
+    name: "氣合",
     short: "気",
     official: "通常の戦闘で受けたダメージの一部を一定時間ごとに回復します。",
     detail:
@@ -192,7 +197,7 @@ export const SKILLS: SkillDef[] = [
   },
   {
     id: 5,
-    name: "狙撃",
+    name: "狙擊",
     short: "狙",
     official: "同じ射撃対象を一定時間ロックオンし続けることで、コストに応じてより強力な射撃を行える狙撃状態になります。",
     detail:
@@ -271,7 +276,7 @@ export const SKILLS: SkillDef[] = [
   },
   {
     id: 10,
-    name: "疾駆",
+    name: "疾驅",
     short: "疾",
     official: "兵種に応じて移動速度が上がります。",
     detail: "依兵種提高移動速度。騎兵加幅較細，其他兵種較明顯。",
@@ -343,7 +348,7 @@ export const SKILLS: SkillDef[] = [
   },
   {
     id: 15,
-    name: "覇気",
+    name: "霸氣",
     short: "覇",
     official: "武将コストに応じて覇気が溜まる量が増え、特技「覇気」を持つ武将の武将コスト合計に応じて英傑呼応のダメージが上がります。",
     detail: "加快霸氣累積，並依「覇気」持有武將成本合計提高英傑呼應（攻城呼應）傷害。推城威脅明顯。",
@@ -383,14 +388,6 @@ export function skillById(id: number): SkillDef {
 
 export function thumbUrl(card: Card): string {
   return `https://image.eiketsu-taisen.net/general/card_small/${card.id}.jpg`;
-}
-
-export function portraitUrl(card: Card): string {
-  return `https://image.eiketsu-taisen.net/general/card_ds/${card.img}.jpg`;
-}
-
-export function rangeIconUrl(hash: string): string {
-  return `https://image.eiketsu-taisen.net/strat/range/icon/${hash}.png`;
 }
 
 export function officialUrl(card: Card): string {

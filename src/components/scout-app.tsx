@@ -12,6 +12,7 @@ import {
   formatCost,
   formatStratDuration,
   PERIODS,
+  PERIOD_LABEL,
   RARITIES,
   SKILLS,
   UNITS,
@@ -75,7 +76,7 @@ export function ScoutApp() {
     colors.length ? colors.join(" ") : null,
     costs.length ? costs.map(formatCost).join("/") + "C" : null,
     units.length ? units.map((u) => UNIT_SHORT[u as keyof typeof UNIT_SHORT] ?? u).join(" ") : null,
-    periods.length ? periods.join(" ") : null,
+    periods.length ? periods.map((p) => PERIOD_LABEL[p] ?? p).join(" ") : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -199,7 +200,7 @@ export function ScoutApp() {
                   cols="grid-cols-5"
                   items={PERIODS.map((p) => ({
                     key: p,
-                    label: p,
+                    label: PERIOD_LABEL[p] ?? p,
                     active: periods.includes(p),
                     toggle: () => toggle(periods, p, setPeriods),
                   }))}
