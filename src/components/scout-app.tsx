@@ -310,18 +310,20 @@ export function ScoutApp() {
             </ul>
           </section>
 
-          <aside className="relative hidden min-h-0 overflow-hidden lg:block">
-            {selected ? <CardThemeBackdrop card={selected} /> : null}
-            <div className="relative z-10 h-full overflow-y-auto p-5">
-              {selected ? (
-                <CardDetail card={selected} />
-              ) : (
-                <p className="text-sm leading-relaxed text-pretty text-muted">
-                  揀一張武將，即睇計略時長同效果值。
-                </p>
-              )}
-            </div>
-          </aside>
+          {isDesktop ? (
+            <aside className="relative min-h-0 overflow-hidden">
+              {selected ? <CardThemeBackdrop card={selected} /> : null}
+              <div className="relative z-10 h-full overflow-y-auto p-5">
+                {selected ? (
+                  <CardDetail card={selected} />
+                ) : (
+                  <p className="text-sm leading-relaxed text-pretty text-muted">
+                    揀一張武將，即睇計略時長同效果值。
+                  </p>
+                )}
+              </div>
+            </aside>
+          ) : null}
         </div>
       )}
 
