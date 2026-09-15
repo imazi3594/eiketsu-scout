@@ -543,9 +543,9 @@ function CardHitRow({
           ) : null}
         </p>
         <p className="mt-0.5 truncate text-xs text-faint">
-          <span className="tabular-nums text-fg">{dur.compact}</span>
-          {"　"}
-          {card.stratName}　士氣{card.stratCost}
+          <span className="text-fg">{card.stratName}</span>
+          <span className="text-muted">　士氣{card.stratCost}</span>
+          <span className="tabular-nums text-muted">　{dur.compact}</span>
         </p>
       </div>
     </button>
