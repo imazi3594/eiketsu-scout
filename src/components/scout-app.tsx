@@ -11,6 +11,7 @@ import {
   formatStratDuration,
   PERIODS,
   RARITIES,
+  RARITY_CLASS,
   SKILLS,
   UNITS,
   UNIT_SHORT,
@@ -532,6 +533,9 @@ function CardHitRow({
         <p className="flex min-w-0 items-center gap-1.5 text-xs">
           <span className={cn("shrink-0 rounded-sm px-1 py-px font-medium", COLOR_CLASS[card.color])}>{card.no}</span>
           <UnitIcon unit={card.unit} title={card.unit} className="size-4" />
+          <span className={cn("shrink-0 text-[10px] font-semibold tracking-wide", RARITY_CLASS[card.rarity])}>
+            {card.rarity}
+          </span>
           <span className="min-w-0 truncate font-medium text-fg">{card.name}</span>
           <CostPips cost={card.cost} small />
           <span className="shrink-0 tabular-nums text-muted">武{card.power}</span>

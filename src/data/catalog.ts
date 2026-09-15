@@ -82,6 +82,12 @@ export const PERIOD_LABEL: Record<string, string> = {
   特殊: "特殊",
 };
 export const RARITIES: Rarity[] = ["N", "R", "SR", "ER"];
+export const RARITY_CLASS: Record<Rarity, string> = {
+  N: "text-muted",
+  R: "text-rarity-r",
+  SR: "text-cost",
+  ER: "rarity-er",
+};
 export const COSTS = [1, 1.5, 2, 2.5, 3, 3.5, 4];
 
 export const UNIT_SHORT: Record<UnitName, string> = {
