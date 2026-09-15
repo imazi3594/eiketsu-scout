@@ -533,21 +533,19 @@ function CardHitRow({
           <span className={cn("shrink-0 rounded-sm px-1 py-px font-medium", COLOR_CLASS[card.color])}>{card.no}</span>
           <UnitIcon unit={card.unit} title={card.unit} className="size-4" />
           <span className="min-w-0 truncate font-medium text-fg">{card.name}</span>
+          <CostPips cost={card.cost} small />
+          <span className="shrink-0 tabular-nums text-muted">武{card.power}</span>
+          <span className="shrink-0 tabular-nums text-muted">知{card.intel}</span>
           {card.skills.length ? (
             <span className="ml-auto flex shrink-0 items-center gap-1">
               <SkillList ids={card.skills} compact />
             </span>
           ) : null}
         </p>
-        <p className="mt-0.5 flex min-w-0 items-center gap-2 text-xs text-faint">
-          <CostPips cost={card.cost} small />
-          <span className="shrink-0 tabular-nums text-muted">武{card.power}</span>
-          <span className="shrink-0 tabular-nums text-muted">知{card.intel}</span>
-          <span className="min-w-0 truncate">
-            <span className="tabular-nums text-fg">{dur.compact}</span>
-            {"　"}
-            {card.stratName}　士氣{card.stratCost}
-          </span>
+        <p className="mt-0.5 truncate text-xs text-faint">
+          <span className="tabular-nums text-fg">{dur.compact}</span>
+          {"　"}
+          {card.stratName}　士氣{card.stratCost}
         </p>
       </div>
     </button>
