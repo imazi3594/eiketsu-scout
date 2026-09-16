@@ -1,7 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Card, ColorName, UnitName } from "@/data/catalog";
 import { UnitIcon } from "@/components/unit-icon";
-import { cn } from "@/lib/utils";
 
 const FACTION: Record<ColorName, string> = {
   蒼: "var(--color-faction-ao)",
@@ -46,35 +45,11 @@ export function CardThemeBackdrop({ card }: { card: Card }) {
 }
 
 export function HomeWash() {
-  const marks: { unit: UnitName; color: string; className: string; rotate: string }[] = [
-    { unit: "槍兵", color: "var(--color-faction-ao)", className: "-left-8 top-8 size-40", rotate: "28deg" },
-    { unit: "騎兵", color: "var(--color-faction-hi)", className: "right-[-2rem] top-24 size-44", rotate: "-18deg" },
-    { unit: "弓兵", color: "var(--color-faction-heki)", className: "left-10 bottom-28 size-36", rotate: "40deg" },
-    { unit: "剣豪", color: "var(--color-faction-shi)", className: "right-6 bottom-16 size-40", rotate: "-28deg" },
-    { unit: "鉄砲隊", color: "var(--color-faction-ko)", className: "left-1/2 top-1/2 size-48 -translate-x-1/2 -translate-y-1/2", rotate: "8deg" },
-  ];
+  const src = `${import.meta.env.BASE_URL}home-wash.jpg`;
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background: [
-            "radial-gradient(80% 55% at 8% 12%, color-mix(in srgb, var(--color-faction-ao) 32%, transparent), transparent 58%)",
-            "radial-gradient(70% 50% at 96% 8%, color-mix(in srgb, var(--color-faction-hi) 26%, transparent), transparent 55%)",
-            "radial-gradient(65% 50% at 88% 92%, color-mix(in srgb, var(--color-faction-ko) 24%, transparent), transparent 56%)",
-            "radial-gradient(60% 45% at 6% 88%, color-mix(in srgb, var(--color-faction-shi) 22%, transparent), transparent 52%)",
-            "radial-gradient(50% 40% at 50% 48%, color-mix(in srgb, var(--color-cost) 12%, transparent), transparent 62%)",
-          ].join(","),
-        }}
-      />
-      {marks.map((mark) => (
-        <UnitIcon
-          key={mark.unit}
-          unit={mark.unit}
-          className={cn("absolute opacity-[0.14]", mark.className)}
-          style={{ color: mark.color, transform: `rotate(${mark.rotate})` }}
-        />
-      ))}
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden bg-bg">
+      <img src={src} alt="" className="absolute inset-0 size-full object-cover object-center" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
     </div>
   );
 }

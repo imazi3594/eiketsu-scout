@@ -435,7 +435,7 @@ export function ScoutApp() {
               {!query.trim() && !layerActive ? (
                 <div className="absolute inset-0">
                   <HomeWash />
-                  <p className="relative z-10 px-6 pt-16 text-center text-sm leading-relaxed text-pretty text-muted">
+                  <p className="relative z-10 px-6 pt-[22vh] text-center text-sm leading-relaxed text-pretty text-fg/80 drop-shadow">
                     可以用篩選，打個名、卡號或計略名其中一個字就可以極速搜查。
                   </p>
                 </div>
