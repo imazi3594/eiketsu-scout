@@ -383,13 +383,18 @@ export function ScoutApp() {
                     />
                   </div>
 
-                <div className="mt-1 flex items-center justify-between">
+                <div className="mt-1 flex items-center">
                   <button
                     type="button"
-                    className="h-8 text-xs text-muted hover:text-fg"
+                    className="flex h-8 shrink-0 items-center gap-0.5 rounded-md bg-surface-2 px-2.5 text-xs text-fg"
                     onClick={() => setMoreFilters((v) => !v)}
+                    aria-expanded={moreFilters}
                   >
-                    更多篩選{periods.length + skills.length + rarities.length ? ` ${periods.length + skills.length + rarities.length}` : ""}
+                    更多篩選
+                    {periods.length + skills.length + rarities.length ? (
+                      <span className="tabular-nums">{periods.length + skills.length + rarities.length}</span>
+                    ) : null}
+                    {moreFilters ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
                   </button>
                 </div>
 
