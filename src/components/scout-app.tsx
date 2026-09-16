@@ -212,7 +212,8 @@ export function ScoutApp() {
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-bg text-fg">
-      <header className="shrink-0 border-b border-border bg-bg">
+      {tab === "search" ? <HomeWash faded /> : null}
+      <header className={cn("relative z-10 shrink-0 border-b border-border", tab === "search" ? "bg-bg/60 backdrop-blur-sm" : "bg-bg")}>
         <div className="mx-auto max-w-6xl px-4 py-2.5 sm:px-6 sm:pb-3 sm:pt-5">
           <p className="hidden text-xs tracking-widest text-faint sm:block">EIKETSU TAISEN</p>
           <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦⚡️速查</h1>
@@ -265,8 +266,8 @@ export function ScoutApp() {
         </main>
       ) : (
         <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
-          <section className="flex min-h-0 min-w-0 flex-1 flex-col border-border lg:border-r">
-            <div className="shrink-0 border-b border-border bg-bg px-4 py-2.5 sm:px-6">
+          <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-border lg:border-r">
+            <div className="shrink-0 border-b border-border bg-bg/60 px-4 py-2.5 backdrop-blur-sm sm:px-6">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-faint" />
                 <Input
@@ -433,12 +434,9 @@ export function ScoutApp() {
 
             <div className="relative min-h-0 flex-1">
               {!query.trim() && !layerActive ? (
-                <div className="absolute inset-0">
-                  <HomeWash />
-                  <p className="relative z-10 px-6 pt-[22vh] text-center text-sm leading-relaxed text-pretty text-fg/80 drop-shadow">
-                    可以用篩選，打個名、卡號或計略名其中一個字就可以極速搜查。
-                  </p>
-                </div>
+                <p className="px-6 pt-10 text-center text-sm leading-relaxed text-pretty text-muted">
+                  可以用篩選，打個名、卡號或計略名其中一個字就可以極速搜查。
+                </p>
               ) : (
                 <ul className="h-full overflow-y-auto overscroll-contain px-2 py-2 sm:px-4">
                   {!hits.length ? (

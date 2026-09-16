@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Card, ColorName, UnitName } from "@/data/catalog";
 import { UnitIcon } from "@/components/unit-icon";
+import { cn } from "@/lib/utils";
 
 const FACTION: Record<ColorName, string> = {
   蒼: "var(--color-faction-ao)",
@@ -44,12 +45,16 @@ export function CardThemeBackdrop({ card }: { card: Card }) {
   );
 }
 
-export function HomeWash() {
+export function HomeWash({ faded = false }: { faded?: boolean }) {
   const src = `${import.meta.env.BASE_URL}home-wash.jpg`;
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden bg-bg">
-      <img src={src} alt="" className="absolute inset-0 size-full object-cover object-center" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <img
+        src={src}
+        alt=""
+        className={cn("absolute inset-0 size-full object-cover object-center", faded ? "opacity-40" : "opacity-100")}
+      />
+      <div className={cn("absolute inset-0", faded ? "bg-bg/55" : "bg-gradient-to-b from-black/30 via-transparent to-black/50")} />
     </div>
   );
 }
