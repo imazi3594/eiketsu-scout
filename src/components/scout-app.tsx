@@ -26,7 +26,7 @@ import { CardThemeBackdrop, HomeWash } from "@/components/card-theme";
 import { CostPips } from "@/components/card-identity";
 import { UnitIcon } from "@/components/unit-icon";
 import { AboutPage } from "@/components/about-page";
-import { SkillExplain, SkillList } from "@/components/skill-chip";
+import { SkillExplain } from "@/components/skill-chip";
 import { cn } from "@/lib/utils";
 import { initInstallCapture } from "@/lib/install";
 
@@ -538,11 +538,12 @@ function CardHitRow({
           </span>
           <span className="min-w-0 truncate font-medium text-fg">{card.name}</span>
           <CostPips cost={card.cost} small />
-          <span className="shrink-0 tabular-nums text-muted">武{card.power}</span>
-          <span className="shrink-0 tabular-nums text-muted">知{card.intel}</span>
+          <span className="shrink-0 tabular-nums text-muted">
+            /{card.power}/{card.intel}
+          </span>
           {card.skills.length ? (
-            <span className="ml-auto flex shrink-0 items-center gap-1">
-              <SkillList ids={card.skills} compact />
+            <span className="ml-auto shrink-0 text-[10px] font-medium tracking-wide text-cost">
+              {card.skills.map((id) => SKILLS[id]?.short ?? "").join("")}
             </span>
           ) : null}
         </p>
