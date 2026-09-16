@@ -26,7 +26,7 @@ import { CardThemeBackdrop, HomeWash } from "@/components/card-theme";
 import { CostPips } from "@/components/card-identity";
 import { UnitIcon } from "@/components/unit-icon";
 import { AboutPage } from "@/components/about-page";
-import { SkillExplain } from "@/components/skill-chip";
+import { SkillExplain, SkillList } from "@/components/skill-chip";
 import { cn } from "@/lib/utils";
 import { initInstallCapture } from "@/lib/install";
 
@@ -542,8 +542,8 @@ function CardHitRow({
             /{card.power}/{card.intel}
           </span>
           {card.skills.length ? (
-            <span className="ml-auto shrink-0 text-[10px] font-medium tracking-wide text-cost">
-              {card.skills.map((id) => SKILLS[id]?.short ?? "").join("")}
+            <span className="ml-auto flex shrink-0 items-center">
+              <SkillList ids={card.skills} short />
             </span>
           ) : null}
         </p>

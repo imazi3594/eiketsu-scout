@@ -7,12 +7,14 @@ const TILE =
 export function SkillChip({
   id,
   compact,
+  short,
   count,
   active,
   onClick,
 }: {
   id: number;
   compact?: boolean;
+  short?: boolean;
   count?: number;
   active?: boolean;
   onClick?: () => void;
@@ -26,25 +28,28 @@ export function SkillChip({
       onClick={onClick}
       className={cn(
         TILE,
-        compact ? "h-5 px-1.5 text-[10px]" : "h-6 px-2 text-xs",
+        short ? "size-5 px-0 text-[10px]" : compact ? "h-5 px-1.5 text-[10px]" : "h-6 px-2 text-xs",
         onClick && "hover:brightness-110",
         active && "bg-black text-cost",
       )}
     >
-      {skill.name}
-      {count != null && count > 1 ? <span className="ml-0.5 tabular-nums">×{count}</span> : null}
+      {short ? skill.short : skill.name}
+      {!short && count != null && count > 1 ? <span className="ml-0.5 tabular-nums">×{count}</span> : null}
     </Comp>
   );
 }
 
-export function SkillList({ ids, compact }: { ids: number[]; compact?: boolean }) {
-  if (!ids.length) return <span className={cn("text-faint", compact ? "text-xs" : "text-sm")}>無特技</span>;
+export function SkillList({ ids, compact, short }: { ids: number[]; compact?: boolean; short?: boolean }) {
+  if (!ids.length) return <span className={cn("text-faint", compact || short ? "text-xs" : "text-sm")}>無特技</span>;
   const counts = new Map<number, number>();
   for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
+  const entries = short
+    ? ids.map((id, i) => [id, 1, i] as const)
+    : [...counts.entries()].map(([id, n], i) => [id, n, i] as const);
   return (
-    <div className={cn("flex flex-wrap", compact ? "gap-1" : "gap-1.5")}>
-      {[...counts.entries()].map(([id, n]) => (
-        <SkillChip key={id} id={id} compact={compact} count={n} />
+    <div className={cn("flex flex-wrap", short ? "gap-0.5" : compact ? "gap-1" : "gap-1.5")}>
+      {entries.map(([id, n, i]) => (
+        <SkillChip key={`${id}-${i}`} id={id} compact={compact} short={short} count={n} />
       ))}
     </div>
   );
