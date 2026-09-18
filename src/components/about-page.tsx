@@ -3,7 +3,7 @@ import { Copy, Download, Share, Smartphone } from "lucide-react";
 import { CARD_COUNT, DATA_META } from "@/data/catalog";
 import { deviceKind, isStandalone, subscribeInstall, type BeforeInstall } from "@/lib/install";
 
-const PAGE_URL = "https://imazi3594.github.io/eiketsu-scout/";
+const PAGE_URL = "https://imazi3594.github.io/ek-scout/";
 
 export function AboutPage() {
   const [installEvent, setInstallEvent] = useState<BeforeInstall | null>(null);
@@ -156,11 +156,11 @@ export function AboutPage() {
           開源：{" "}
           <a
             className="text-fg underline decoration-border underline-offset-2"
-            href="https://github.com/imazi3594/eiketsu-scout"
+            href="https://github.com/imazi3594/ek-scout"
             target="_blank"
             rel="noreferrer"
           >
-            imazi3594/eiketsu-scout
+            imazi3594/ek-scout
           </a>
         </p>
       </section>
