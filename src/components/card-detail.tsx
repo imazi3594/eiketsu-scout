@@ -158,7 +158,7 @@ function EffectRow({ row }: { row: StatLine }) {
         <ul className="space-y-0.5">
           {lines.map((line) => (
             <li key={line} className="text-sm leading-relaxed tabular-nums text-fg">
-              <span className="text-faint">，</span>
+              <span className="text-faint">· </span>
               {line}
             </li>
           ))}
