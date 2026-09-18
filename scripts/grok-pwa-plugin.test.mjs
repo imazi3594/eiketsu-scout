@@ -480,6 +480,27 @@ test("renders the manifest with the per-app name", () => {
   assert.equal(manifest.icons[0].src, "/__grok/icon-180.png");
 });
 
+test("branded site.json title and icons win over the host slug", () => {
+  const manifest = JSON.parse(
+    renderWebManifest("eiketsu-scout.grok.me", {
+      title: "英傑大戦⚡️速查",
+      short_name: "英傑⚡️速查",
+    }),
+  );
+  assert.equal(manifest.name, "英傑大戦⚡️速查");
+  assert.equal(manifest.short_name, "英傑⚡️速查");
+  assert.equal(manifest.icons[0].src, "/icons/icon-192.png");
+  assert.ok(manifest.icons.some((icon) => icon.src === "/apple-touch-icon.png"));
+});
+
+test("keeps the app apple-touch-icon instead of the Grok fallback", () => {
+  const html =
+    '<html><head><link rel="apple-touch-icon" href="./apple-touch-icon.png"></head></html>';
+  const out = injectGrokPwaHead(html, { appName: "Wild Race" });
+  assert.match(out, /href="\.\/apple-touch-icon\.png"/);
+  assert.doesNotMatch(out, /href="\/__grok\/icon-180\.png"/);
+});
+
 // Tripwires: the deployed-app path only works if Nitro scans server/ — an
 // accidental edit that drops serverDir or the middleware file would otherwise
 // fail silently (published apps would just render the app for ?install=1).
