@@ -31,15 +31,15 @@ export function AboutPage() {
       return;
     }
     if (iosChrome) {
-      setHint("iPhone 嘅 Chrome 裝完一定有地址欄。要無 toolbar，請用 Safari 打開再加到主畫面。");
+      setHint("iPhone 的 Chrome 安裝後仍會顯示地址欄。若要隱藏 toolbar，請以 Safari 開啟並加到主畫面。");
       return;
     }
     if (ios) {
-      setHint("撳底欄分享掣，再揀「加到主畫面」。唔好用 Chrome。");
+      setHint("按底欄分享鍵，再選「加到主畫面」。請勿使用 Chrome。");
       return;
     }
     if (android) {
-      setHint("Chrome 右上 ⋮ → 揀「安裝應用程式」。唔好揀「加到主畫面」，嗰個會留住地址欄。");
+      setHint("Chrome 右上 ⋮ → 選「安裝應用程式」。請勿選「加到主畫面」，該選項會保留地址欄。");
       return;
     }
     setHint("用 Chrome 右上 ⋮ →「安裝應用程式」。");
@@ -72,16 +72,16 @@ export function AboutPage() {
       </div>
 
       <p className="mt-6 text-sm leading-relaxed text-pretty text-fg">
-        對戰入面打個名、卡號或計略，即刻睇時長（C）、武力／回血、渾身三欄、琥煌 0–6 劍。專為手機一隻手速查。
+        對戰時輸入名稱、卡號或計略，即可查看時長（C）、武力／回血、渾身三欄、琥煌 0–6 劍。專為單手速查而設。
       </p>
 
       <section className="mt-6 rounded-lg border border-white/10 bg-black/35 p-4">
         <p className="flex items-center gap-2 text-xs text-faint">
           <Smartphone className="size-3.5" />
-          裝成獨立 App（冇地址欄）
+          安裝為獨立 App（無地址欄）
         </p>
         {installed ? (
-          <p className="mt-3 text-sm text-fg">而家已經係獨立畫面。之後由主畫面個閃電 icon 開就得。</p>
+          <p className="mt-3 text-sm text-fg">目前已是獨立畫面。之後由主畫面閃電圖示開啟即可。</p>
         ) : (
           <>
             <button
@@ -96,7 +96,7 @@ export function AboutPage() {
 
             {iosChrome ? (
               <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted">
-                <p className="text-fg">iPhone Chrome 唔可以隱藏 toolbar。請改用 Safari：</p>
+                <p className="text-fg">iPhone Chrome 無法隱藏 toolbar。請改用 Safari：</p>
                 <button
                   type="button"
                   onClick={() => void copyLink()}
@@ -108,26 +108,26 @@ export function AboutPage() {
                 <ol className="list-decimal space-y-2 pl-5">
                   <li>打開 Safari，貼上網址</li>
                   <li>
-                    撳底欄
+                    按底欄
                     <Share className="mx-1 inline size-3.5 align-[-2px]" />
                     分享
                   </li>
-                  <li>揀「加到主畫面」→「加入」</li>
+                  <li>選「加到主畫面」→「加入」</li>
                 </ol>
               </div>
             ) : ios ? (
               <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-muted">
                 <li>
-                  撳 Safari 底欄
+                  按 Safari 底欄
                   <Share className="mx-1 inline size-3.5 align-[-2px]" />
                   分享
                 </li>
-                <li>向上滑，揀「加到主畫面」</li>
-                <li>右上角「加入」。主畫面個閃電 icon 開就冇地址欄。</li>
+                <li>向上滑，選「加到主畫面」</li>
+                <li>右上角「加入」。由主畫面閃電圖示開啟即無地址欄。</li>
               </ol>
             ) : (
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                Android Chrome 要揀「安裝應用程式」，唔好揀「加到主畫面」——後者會留住 browser toolbar。
+                Android Chrome 須選「安裝應用程式」，請勿選「加到主畫面」——後者會保留 browser toolbar。
               </p>
             )}
           </>
@@ -144,14 +144,14 @@ export function AboutPage() {
           <a className="text-fg underline decoration-border underline-offset-2" href="https://eiketsudb.com/" target="_blank" rel="noreferrer">
             eiketsudb.com
           </a>
-          ，對戰時唔使另開官網慢慢翻。
+          ，對戰時不必另開官網翻查。
         </p>
-        <p className="mt-3">英傑大戦係 SEGA 嘅遊戲。呢個係玩家自用速查，同官方無關係。</p>
+        <p className="mt-3">英傑大戦為 SEGA 的遊戲。此為玩家自用速查，與官方無關。</p>
       </section>
 
       <section className="mt-4 rounded-lg border border-white/10 bg-black/35 p-4 text-sm leading-relaxed text-pretty text-muted">
         <p className="text-xs text-faint">Credit</p>
-        <p className="mt-2 text-fg">Grok（xAI）設計同整</p>
+        <p className="mt-2 text-fg">Grok（xAI）設計與製作</p>
         <p className="mt-1">
           開源：{" "}
           <a

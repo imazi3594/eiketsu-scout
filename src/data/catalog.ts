@@ -139,8 +139,8 @@ export const SKILLS: SkillDef[] = [
     short: "伏",
     official: "敵軍視点から視認されない伏兵状態で開戦します。敵部隊と接触すると知力差によるダメージを与え、伏兵状態は解除されます。",
     detail:
-      "開場以伏兵登場，對手睇唔到、移速大幅下降、唔可以攻擊。接觸敵部隊時依知力差造成傷害然後解除。伏兵中幾乎唔食戰鬥傷害，弓同斬擊通常打不中，但傷害計略命中、撞柵／櫓、入攻城區、歸城、自己放計略都會解除。",
-    playTip: "對戰時先估對手知力。高知力伏兵係開場爆發。霸氣槽無故跳動往往代表附近有伏兵。",
+      "開場以伏兵登場，敵軍無法看見、移速大幅下降、無法攻擊。接觸敵部隊時依知力差造成傷害然後解除。伏兵中幾乎不受戰鬥傷害，弓與斬擊通常打不中，但傷害計略命中、撞柵／櫓、入攻城區、歸城、自身放計略都會解除。",
+    playTip: "對戰時先估對手知力。高知力伏兵是開場爆發。霸氣槽無故跳動往往代表附近有伏兵。",
     kind: "open",
     facts: [
       { label: "傷害", value: "30 × (己知力 ÷ 敵知力) ＋ 10" },
@@ -154,7 +154,7 @@ export const SKILLS: SkillDef[] = [
     short: "柵",
     official: "敵部隊の動きを阻害する障害物「柵」を部隊前方に配置した状態で開戦します。",
     detail:
-      "開場喺部隊前方放柵，擋敵移動。持有幾個防柵就放幾道。柵被敵部隊撞到一定次數後破壞。唔擋己方。亦可擋鐵砲射擊（達次數仍會壞），貫通射擊仍然有效。",
+      "開場在部隊前方放柵，阻擋敵移動。持有幾個防柵就放幾道。柵被敵部隊撞到一定次數後破壞。不阻擋己方。亦可擋鐵砲射擊（達次數仍會壞），貫通射擊仍然有效。",
     playTip: "用來卡路、保護弓砲、拖延攻城。見到防柵要改道或用傷害計略清掉。",
     kind: "open",
     facts: [{ label: "放置", value: "每 1 個防柵＝前方 1 道柵" }],
@@ -165,8 +165,8 @@ export const SKILLS: SkillDef[] = [
     short: "活",
     official: "撤退した際、復活するために必要な時間が減少します。",
     detail:
-      "撤退後復活等待時間縮短。依卡組「復活」持有數疊加，唔係每張卡各自 −4 秒。",
-    playTip: "對手復活多＝戰線唔容易空。擊破後要趁復活空窗推城。",
+      "撤退後復活等待時間縮短。依卡組「復活」持有數疊加，並非每張卡各自 −4 秒。",
+    playTip: "對手復活多＝戰線不易空虛。擊破後要趁復活空窗推城。",
     kind: "combat",
     facts: [
       { label: "1 個", value: "−4 秒（約 1.7C）" },
@@ -181,8 +181,8 @@ export const SKILLS: SkillDef[] = [
     short: "忍",
     official: "敵軍視点から視認されない隠密状態になります。ただし敵部隊または敵城に近づくと隠密状態は解除されます。",
     detail:
-      "遠離敵部隊／敵城時進入隠密，對手睇唔到人、亦睇唔到出城煙。靠近約 1.5 卡距離或敵城第一格、撞柵櫓、被傷害計略打中、被兵種動作打中會解除。離開後過一段時間會再隠密。弓通常鎖唔到隠密目標。突擊光環、槍光環、出入城特效都會藏起。",
-    playTip: "側襲、繞後、偷攻城嘅訊號。睇霸氣槽異常跳動或突然現形位置嚟捉。",
+      "遠離敵部隊／敵城時進入隠密，敵軍無法看見，亦看不見出城煙。靠近約 1.5 卡距離或敵城第一格、撞柵櫓、被傷害計略打中、被兵種動作打中會解除。離開後過一段時間會再隠密。弓通常無法鎖定隠密目標。突擊光環、槍光環、出入城特效都會藏起。",
+    playTip: "側襲、繞後、偷攻城的訊號。看霸氣槽異常跳動或突然現形位置來捕捉。",
     kind: "move",
     facts: [{ label: "現形距離", value: "約 1.5 張卡距離／敵城第一格" }],
   },
@@ -192,11 +192,11 @@ export const SKILLS: SkillDef[] = [
     short: "気",
     official: "通常の戦闘で受けたダメージの一部を一定時間ごとに回復します。",
     detail:
-      "受到嘅一般戰鬥傷害有一部分以紅色兵力顯示，並隨時間回復。弓攻擊期間氣合回復唔會發動。伏兵知力傷害同計略減血唔會轉成紅槽。超過 100% 兵力嘅部份亦唔回。",
-    playTip: "氣合槍騎唔好用磨血，要一次打穿或用計略傷害。弓壓制可停其回復。",
+      "受到的一般戰鬥傷害有一部分以紅色兵力顯示，並隨時間回復。弓攻擊期間氣合回復不會發動。伏兵知力傷害與計略減血不會轉成紅槽。超過 100% 兵力的部分亦不回復。",
+    playTip: "氣合槍騎不宜以磨血應對，要一次打穿或用計略傷害。弓壓制可停其回復。",
     kind: "combat",
     facts: [
-      { label: "可回復比例", value: "一般戰鬥傷害嘅 15%" },
+      { label: "可回復比例", value: "一般戰鬥傷害的 15%" },
       { label: "回復節奏", value: "每 2.0 秒（約 0.8C）回 1.5%" },
     ],
     durationC: "回復間隔 0.8C",
@@ -207,7 +207,7 @@ export const SKILLS: SkillDef[] = [
     short: "狙",
     official: "同じ射撃対象を一定時間ロックオンし続けることで、コストに応じてより強力な射撃を行える狙撃状態になります。",
     detail:
-      "鐵砲隊專用。持續鎖定同一目標後照準由藍變黃，進入狙撃。狙撃傷害更高、命中會擊退、瞬間唔可以歸城，並解除騎兵突擊準備。效果隨成本上升。",
+      "鐵砲隊專用。持續鎖定同一目標後照準由藍變黃，進入狙撃。狙撃傷害更高、命中會擊退、瞬間無法歸城，並解除騎兵突擊準備。效果隨成本上升。",
     playTip: "被鎖時立刻側移、進掩體或拿前排去擋。高成本狙撃非常痛。",
     kind: "combat",
     facts: [
@@ -222,8 +222,8 @@ export const SKILLS: SkillDef[] = [
     short: "昂",
     official: "コストに応じて士気が増加した状態で開戦します。",
     detail:
-      "開場即加士氣。持有昂揚嘅武將成本每 0.5C，士氣 ＋0.1（合計 5.0C ＝ 士氣 1）。同一張卡有兩個昂揚會再倍增。",
-    playTip: "把對手昂揚成本加總 ×0.2 就係額外開場士氣。高昂揚卡組會搶先手計略。",
+      "開場即加士氣。持有昂揚的武將成本每 0.5C，士氣 ＋0.1（合計 5.0C ＝ 士氣 1）。同一張卡有兩個昂揚會再倍增。",
+    playTip: "把對手昂揚成本加總 ×0.2 即為額外開場士氣。高昂揚卡組會搶先手計略。",
     kind: "open",
     facts: [
       { label: "公式", value: "士氣 ＋（昂揚成本合計 × 0.2）" },
@@ -240,8 +240,8 @@ export const SKILLS: SkillDef[] = [
     short: "技",
     official: "コストに応じて流派ゲージが増加した状態で開戦します。",
     detail:
-      "開場增加流派槽。持有技巧嘅武將成本每 0.5C，流派槽 ＋1/60（合計 5.0C ＝ 整條槽嘅 1/6）。",
-    playTip: "技巧多嘅卡組中期會突然變強。盡早打斷其流派節奏。",
+      "開場增加流派槽。持有技巧的武將成本每 0.5C，流派槽 ＋1/60（合計 5.0C ＝ 整條槽的 1/6）。",
+    playTip: "技巧多的卡組中期會突然變強。盡早打斷其流派節奏。",
     kind: "open",
     facts: [
       { label: "公式", value: "槽 ＋（技巧成本合計 ÷ 30）條" },
@@ -257,7 +257,7 @@ export const SKILLS: SkillDef[] = [
     official: "開戦から一定時間、武力と知力が上がります。",
     detail:
       "開場期間武力、知力各 ＋1。倒數時鐘由 99C 去到 50C 為止（約頭 49C）。持有多個先陣會再疊加。",
-    playTip: "開場唔好正面硬剛先陣隊，等紅利結束再打，或用妨害拖時間。",
+    playTip: "開場不宜正面硬拚先陣隊，等紅利結束再打，或用妨害拖時間。",
     kind: "open",
     facts: [
       { label: "持續", value: "99C → 50C（約 49C／118 秒）" },
@@ -271,8 +271,8 @@ export const SKILLS: SkillDef[] = [
     short: "鬼",
     official: "兵力が一定以下になると、兵種アクションによるダメージと弾き効果を軽減します。",
     detail:
-      "兵力掉到約 40% 以下後，兵種動作（突擊、槍擊、斬擊、射擊等）嘅傷害同彈開會減輕。亂戰同計略傷害唔減。兵力回上去會解除。發動時名牌右上圖示變亮。",
-    playTip: "鬼武將殘血好黏。用計略傷害或知力傷害補刀，唔好只靠兵種動作磨。",
+      "兵力掉到約 40% 以下後，兵種動作（突擊、槍擊、斬擊、射擊等）的傷害與彈開會減輕。亂戰與計略傷害不減。兵力回上去會解除。發動時名牌右上圖示變亮。",
+    playTip: "鬼武將殘血很黏。用計略傷害或知力傷害補刀，不要只靠兵種動作磨。",
     kind: "combat",
     facts: [
       { label: "發動", value: "兵力約 40% 以下" },
@@ -286,7 +286,7 @@ export const SKILLS: SkillDef[] = [
     short: "疾",
     official: "兵種に応じて移動速度が上がります。",
     detail: "依兵種提高移動速度。騎兵加幅較細，其他兵種較明顯。",
-    playTip: "疾驅要預判走位，用柵、槍線或範圍計略攔截，唔好追直線。",
+    playTip: "疾驅要預判走位，用柵、槍線或範圍計略攔截，不要追直線。",
     kind: "move",
     facts: [
       { label: "騎兵", value: "移速 ＋約 5%" },
@@ -299,8 +299,8 @@ export const SKILLS: SkillDef[] = [
     short: "兵",
     official: "特技「大兵」を持つ武将と同じ時代の武将コスト合計に応じて最大兵力が上がります。",
     detail:
-      "同持有「大兵」嘅武將同一時代嘅登錄成本愈高，最大兵力愈高。同時代集中嘅卡組會特別肉。",
-    playTip: "睇對手時代係咪集中。同時代大兵隊要用範圍傷害或計略處理。",
+      "與持有「大兵」的武將同一時代的登錄成本愈高，最大兵力愈高。同時代集中的卡組會特別肉。",
+    playTip: "看對手時代是否集中。同時代大兵隊要用範圍傷害或計略處理。",
     kind: "open",
     facts: [
       { label: "合計 1.0C", value: "最大兵力 ＋約 5%" },
@@ -314,7 +314,7 @@ export const SKILLS: SkillDef[] = [
     name: "同盟",
     short: "盟",
     official: "最大士気が増加した状態で開戦します。ただし１５より多くならない。",
-    detail: "開場提高最大士氣上限。每 1 個同盟 ＋1，唔會超過 15。",
+    detail: "開場提高最大士氣上限。每 1 個同盟 ＋1，不會超過 15。",
     playTip: "同盟＝後期大型計略威脅。前期要壓節奏，別讓對方把槽存滿。",
     kind: "open",
     facts: [{ label: "最大士氣", value: "每個同盟 ＋1（上限 15）" }],
@@ -325,8 +325,8 @@ export const SKILLS: SkillDef[] = [
     short: "槍",
     official: "コストに応じて槍が長くなり、槍撃ダメージが上がります。",
     detail:
-      "槍兵特技。成本愈高槍愈長、槍擊傷害愈高。高成本槍術能喺接觸前就捅到人。",
-    playTip: "唔好對槍線正面衝。側繞、伏兵或遠程處理。",
+      "槍兵特技。成本愈高槍愈長、槍擊傷害愈高。高成本槍術能在接觸前就刺到人。",
+    playTip: "不要對槍線正面衝。側繞、伏兵或遠程處理。",
     kind: "combat",
     facts: [
       { label: "1.0C 槍擊", value: "＋約 0.6%" },
@@ -343,8 +343,8 @@ export const SKILLS: SkillDef[] = [
     short: "黄",
     official: "黄熾ゲージが一定以上になると、武力と知力が上がります。黄熾ゲージは覇道の前進により増加し、時間経過で減少します。",
     detail:
-      "黃勢特有節奏。霸道前進同專用計略加黃熾槽，時間經過會掉。槽達約 1/3（黃色）時武力、知力上升。拖慢對方霸道可壓呢套。",
-    playTip: "黃熾隊會搶推霸道。中途卡住霸道就能削佢哋嘅數值紅利。",
+      "黃勢特有節奏。霸道前進與專用計略加黃熾槽，時間經過會掉。槽達約 1/3（黃色）時武力、知力上升。拖慢對方霸道可壓制此套。",
+    playTip: "黃熾隊會搶推霸道。中途卡住霸道就能削其數值紅利。",
     kind: "gauge",
     facts: [
       { label: "發動", value: "黃熾槽約 1/3 以上　武＋2 知＋2" },
@@ -372,10 +372,10 @@ export const SKILLS: SkillDef[] = [
     official: "宿星ゲージが一定以上になると、武力と知力が上がります。宿星ゲージは与えたダメージに応じて増加します。",
     detail:
       "造成傷害會加宿星槽。槽 100% 以上武知各 ＋1，200%（宿星狀態）各 ＋2。打得順就會雪球。",
-    playTip: "唔好同宿星隊對磨。用妨害、風箏、集火秒掉輸出點。",
+    playTip: "不要與宿星隊對磨。用妨害、風箏、集火秒掉輸出點。",
     kind: "gauge",
     facts: [
-      { label: "槽增加", value: "造成傷害嘅 60%" },
+      { label: "槽增加", value: "造成傷害的 60%" },
       { label: "200% 所需", value: "累積傷害約等於兵力 333%" },
       { label: "100% / 200%", value: "武知 ＋1 / ＋2" },
     ],
@@ -386,7 +386,7 @@ const payload = raw as { count: number; cards: Card[] };
 export const CARDS: Card[] = payload.cards;
 export const CARD_COUNT = payload.count;
 
-/** 資料對應嘅遊戲版同擷取日，下次 scrape 記得改。 */
+/** 資料對應的遊戲版與擷取日，下次 scrape 記得改。 */
 export const DATA_META = {
   gameVer: "3.5.0G",
   pack: "第６彈 古幻相剋の八象",
@@ -455,7 +455,7 @@ export function skillNames(card: Card): string {
     .join("　");
 }
 
-/** 對戰速查用：特技名＋此卡參數，唔帶解說。 */
+/** 對戰速查用：特技名＋此卡參數，不含解說。 */
 export function compactSkill(card: Card, id: number): string {
   const name = SKILLS[id]?.name ?? "?";
   const copies = card.skills.filter((s) => s === id).length;
@@ -495,13 +495,13 @@ export function compactSkill(card: Card, id: number): string {
 export function stratTimeNote(time: string): string {
   switch (time) {
     case "知力時間":
-      return "時長跟知力。下面列出嘅 C 已係此卡計略時長，唔好再加知力×依存（會重複計）。";
+      return "時長隨知力。下列 C 已是此卡計略時長，請勿再加知力×依存（會重複計算）。";
     case "一瞬":
-      return "官方寫一瞬。若有列出 C，多數係據點／殘留效果時長。";
+      return "官方寫一瞬。若有列出 C，多為據點／殘留效果時長。";
     case "撤退するまで":
-      return "直到呢張卡撤退為止。";
+      return "直至此卡撤退為止。";
     case "固定時間":
-      return "固定時長，唔跟知力加減。";
+      return "固定時長，不隨知力增減。";
     default:
       return time;
   }
@@ -549,7 +549,7 @@ function pickMainDurationEffect(card: Card): CardEffect | null {
   return best;
 }
 
-/** 本計時長：優先 効果時間(基本)，有短計時唔好用短計嗰條。 */
+/** 本計時長：優先 効果時間(基本)，有短計時勿取短計那一條。 */
 function pickMainDuration(card: Card): { durC: number | null; depC: number | null; note: string } {
   const preferred = pickMainDurationEffect(card);
   if (preferred) {
@@ -571,7 +571,7 @@ export function formatStratDuration(card: Card): StratDuration {
       picked.depC != null
         ? `知力依存 ${formatCount(picked.depC)}／知力`
         : card.stratTime === "固定時間"
-          ? "固定時長，唔跟知力"
+          ? "固定時長，不隨知力"
           : "";
     const extraBits: string[] = [];
     if (card.stratTime === "撤退するまで") extraBits.push("直至撤退");
@@ -807,7 +807,7 @@ export function kokouTiers(card: Card): KokouTiers | null {
   if (max == null) {
     return {
       max: 6,
-      note: "睇發動時所持劍數（唔係自己揀食幾多）。",
+      note: "依發動時所持劍數（並非自行選擇消耗量）。",
       shared: effectRows(shared),
       extra: extra ? { title: "無友軍", rows: effectRows(extra) } : null,
       cols: [
@@ -825,7 +825,7 @@ export function kokouTiers(card: Card): KokouTiers | null {
 
   return {
     max,
-    note: `琥煌槽最多 6 劍。發動時食 0–${max} 劍，食愈多效果愈強。`,
+    note: `琥煌槽最多 6 劍。發動時消耗 0–${max} 劍，消耗愈多效果愈強。`,
     shared: effectRows(shared),
     extra: extra ? { title: "無友軍", rows: effectRows(extra) } : null,
     cols: groups.map((group, i) => ({
@@ -1015,7 +1015,7 @@ export function skillCardFacts(card: Card, skillId: number): StatLine[] {
       ];
     case 16:
       return [
-        { label: "槽增加", value: "造成傷害嘅 60%" },
+        { label: "槽增加", value: "造成傷害的 60%" },
         { label: "100% / 200%", value: "武知 ＋1 / ＋2" },
       ];
     default:

@@ -207,7 +207,7 @@ function KokouGrid({ data }: { data: KokouTiers }) {
 
 function SwordPips({ n }: { n: number | null }) {
   if (n == null) return <span className="text-xs text-faint">所持</span>;
-  if (n <= 0) return <span className="text-xs text-faint">不食</span>;
+  if (n <= 0) return <span className="text-xs text-faint">不消耗</span>;
   return (
     <span className="flex flex-wrap justify-end gap-px text-[10px] leading-none text-faction-ko" aria-hidden>
       {Array.from({ length: n }, (_, i) => (

@@ -231,7 +231,7 @@ export function ScoutApp() {
       ) : tab === "skills" ? (
         <main className="mx-auto w-full max-w-3xl min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
           <p className="text-sm leading-relaxed text-pretty text-muted">
-            1C＝2.4 秒，全場 99C。下面係各特技嘅持續／成本換算。計略嘅具體 C 數喺武將詳情。
+            1C＝2.4 秒，全場 99C。以下為各特技的持續／成本換算。計略的具體 C 數見於武將詳情。
           </p>
           <p className="mt-1 text-xs tabular-nums text-faint">5C＝12秒　10C＝24秒　50C＝120秒　先陣約 49C</p>
           <div className="mt-5 flex flex-col gap-3">
@@ -260,7 +260,7 @@ export function ScoutApp() {
                 </li>
               ))
             ) : (
-              <li className="px-3 py-16 text-center text-sm text-muted">未睇過武將。喺速查打開過就會出現喺呢度。</li>
+              <li className="px-3 py-16 text-center text-sm text-muted">尚未查看武將。在速查開啟過即會顯示於此。</li>
             )}
           </ul>
         </main>
@@ -440,12 +440,12 @@ export function ScoutApp() {
             <div className="relative min-h-0 flex-1">
               {!query.trim() && !layerActive ? (
                 <p className="px-6 pt-10 text-center text-sm leading-relaxed text-pretty text-muted">
-                  可以用篩選，打個名、卡號或計略名其中一個字就可以極速搜查。
+                  可使用篩選，或輸入名稱、卡號或計略名的其中一字即可極速搜查。
                 </p>
               ) : (
                 <ul className="h-full overflow-y-auto overscroll-contain px-2 py-2 sm:px-4">
                   {!hits.length ? (
-                    <li className="px-3 py-16 text-center text-sm text-muted">搵唔到。試下改篩選或卡號（蒼173）。</li>
+                    <li className="px-3 py-16 text-center text-sm text-muted">找不到。請改篩選或卡號（蒼173）。</li>
                   ) : (
                     hits.map((card) => (
                       <li key={card.id}>
@@ -473,7 +473,7 @@ export function ScoutApp() {
                   <CardDetail card={selected} />
                 ) : (
                   <p className="text-sm leading-relaxed text-pretty text-muted">
-                    揀一張武將，即睇計略時長同效果值。
+                    選擇一張武將，即可查看計略時長與效果值。
                   </p>
                 )}
               </div>
