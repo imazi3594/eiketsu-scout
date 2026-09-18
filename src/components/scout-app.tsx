@@ -206,7 +206,7 @@ export function ScoutApp() {
   const resultLabel = query || layerActive ? `${hits.length} 筆${layerSummary ? `　${layerSummary}` : ""}` : "";
 
   return (
-    <div className="relative flex h-dvh flex-col overflow-hidden bg-bg text-fg">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-bg text-fg">
       {tab === "search" ? <HomeWash faded /> : null}
       <header className={cn("relative z-10 shrink-0 border-b border-border", tab === "search" ? "bg-bg/60 backdrop-blur-sm" : "bg-bg")}>
         <div className="mx-auto max-w-6xl px-4 py-2.5 sm:px-6 sm:pb-3 sm:pt-5">
