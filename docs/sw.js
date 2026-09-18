@@ -1,4 +1,4 @@
-const CACHE = "ek-scout-v3";
+const CACHE = "ek-scout-v4";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

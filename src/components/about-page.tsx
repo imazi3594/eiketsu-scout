@@ -160,7 +160,7 @@ export function AboutPage() {
             target="_blank"
             rel="noreferrer"
           >
-            imazi3594/ek-scout
+            github.com/imazi3594/ek-scout
           </a>
         </p>
       </section>
