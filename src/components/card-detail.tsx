@@ -17,16 +17,27 @@ import {
 } from "@/data/catalog";
 import { Button } from "@/components/ui/button";
 import { CardIdentity } from "@/components/card-identity";
+import { UnitIcon } from "@/components/unit-icon";
 import { cn } from "@/lib/utils";
+
+function MoraleCost({ cost }: { cost: number | string }) {
+  return (
+    <span className="inline-flex shrink-0 items-baseline gap-1.5 whitespace-nowrap">
+      <span className="text-xs text-faint">消耗士氣:</span>
+      <span className="font-display text-2xl tabular-nums leading-none text-fg">{cost}</span>
+    </span>
+  );
+}
 
 export function StratTitle({ card }: { card: Card }) {
   const cats = displayCats(card);
   return (
     <div className="min-w-0">
-      <p className="font-display text-xl leading-tight text-fg">{card.stratName}</p>
-      <p className="mt-0.5 text-xs text-muted">
-        {cats.length ? `${cats.join(" · ")} · ` : null}士氣 {card.stratCost}
-      </p>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="font-display text-xl leading-tight text-fg">{card.stratName}</span>
+        <MoraleCost cost={card.stratCost} />
+      </div>
+      {cats.length ? <p className="mt-1 text-xs text-muted">{cats.join(" · ")}</p> : null}
     </div>
   );
 }
@@ -108,8 +119,10 @@ function TankenBox({ tanken }: { tanken: Tanken }) {
   return (
     <section className="rounded-lg border border-white/10 bg-black/35 p-4">
       <p className="text-xs text-faint">短計</p>
-      <p className="mt-1 font-display text-xl leading-tight text-fg">{tanken.name}</p>
-      {tanken.cost ? <p className="mt-0.5 text-xs text-muted">士氣 {tanken.cost}</p> : null}
+      <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="font-display text-xl leading-tight text-fg">{tanken.name}</span>
+        {tanken.cost ? <MoraleCost cost={tanken.cost} /> : null}
+      </div>
       {tanken.text ? <p className="mt-3 text-sm leading-relaxed text-pretty text-fg">{tanken.text}</p> : null}
       {tanken.rows.length ? <EffectList rows={tanken.rows} /> : null}
     </section>
@@ -192,10 +205,15 @@ function KokouGrid({ data }: { data: KokouTiers }) {
             className={cn("rounded-md px-2.5 py-2", col.highlight ? "bg-faction-ko/30" : "bg-surface-2")}
           >
             <div className="flex items-center justify-between gap-2">
-              <h3 className={cn("font-display text-sm leading-tight", col.highlight ? "text-fg" : "text-muted")}>
-                {col.title}
+              <h3 className={cn("min-h-4 font-display text-sm leading-tight", col.highlight ? "text-fg" : "text-muted")}>
+                {col.swords == null ? (
+                  col.title
+                ) : col.swords <= 0 ? (
+                  "不消耗"
+                ) : (
+                  <KokouSwords n={col.swords} />
+                )}
               </h3>
-              <SwordPips n={col.swords} />
             </div>
             <TierRows id={col.id} rows={col.rows} />
           </section>
@@ -205,13 +223,11 @@ function KokouGrid({ data }: { data: KokouTiers }) {
   );
 }
 
-function SwordPips({ n }: { n: number | null }) {
-  if (n == null) return <span className="text-xs text-faint">所持</span>;
-  if (n <= 0) return <span className="text-xs text-faint">不消耗</span>;
+function KokouSwords({ n }: { n: number }) {
   return (
-    <span className="flex flex-wrap justify-end gap-px text-[10px] leading-none text-faction-ko" aria-hidden>
+    <span className="inline-flex items-center gap-0.5 text-faction-ko" role="img" aria-label={`${n}劍`}>
       {Array.from({ length: n }, (_, i) => (
-        <span key={i}>◆</span>
+        <UnitIcon key={i} unit="剣豪" className="size-4" />
       ))}
     </span>
   );

@@ -11,19 +11,21 @@ import {
   formatStratDuration,
   PERIODS,
   RARITIES,
-  RARITY_CLASS,
+  RARITY_CHIP,
   SKILLS,
+  STRAT_CATS,
   UNITS,
   UNIT_SHORT,
   type ColorName,
   type Card,
 } from "@/data/catalog";
 import { filterCards, searchCards } from "@/lib/search";
+import { translateCat } from "@/data/translate";
 import { useScout } from "@/lib/store";
 import { Input } from "@/components/ui/input";
 import { CardDetail } from "@/components/card-detail";
 import { CardThemeBackdrop, HomeWash } from "@/components/card-theme";
-import { CostPips } from "@/components/card-identity";
+import { CostPips, RarityMark } from "@/components/card-identity";
 import { UnitIcon } from "@/components/unit-icon";
 import { AboutPage } from "@/components/about-page";
 import { SkillExplain, SkillList } from "@/components/skill-chip";
@@ -58,12 +60,10 @@ export function ScoutApp() {
   const [units, setUnits] = useState<string[]>([]);
   const [skills, setSkills] = useState<number[]>([]);
   const [rarities, setRarities] = useState<string[]>([]);
+  const [stratCats, setStratCats] = useState<string[]>([]);
   const [costs, setCosts] = useState<number[]>([]);
   const [moreFilters, setMoreFilters] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(true);
-  const [isDesktop, setIsDesktop] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches,
-  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   const query = useScout((s) => s.query);
@@ -134,10 +134,6 @@ export function ScoutApp() {
 
   useEffect(() => {
     void Promise.resolve(useScout.persist.rehydrate());
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const apply = () => setIsDesktop(mq.matches);
-    apply();
-    mq.addEventListener("change", apply);
 
     history.replaceState({ v: "root" } satisfies Hist, "");
     history.pushState({ v: "home" } satisfies Hist, "");
@@ -169,20 +165,19 @@ export function ScoutApp() {
     };
     window.addEventListener("popstate", onPop);
     return () => {
-      mq.removeEventListener("change", apply);
       window.removeEventListener("popstate", onPop);
     };
   }, []);
 
-  const layerActive = colors.length + costs.length + units.length + periods.length + skills.length + rarities.length;
+  const layerActive = colors.length + costs.length + units.length + periods.length + skills.length + rarities.length + stratCats.length;
 
   const hits = useMemo(() => {
     const q = query.trim();
     if (!q && !layerActive) return [];
     let list = q ? searchCards(q, 200).map((h) => h.card) : CARDS;
-    if (layerActive) list = filterCards(list, { colors, periods, units, skills, rarities, costs });
+    if (layerActive) list = filterCards(list, { colors, periods, units, skills, rarities, costs, stratCats });
     return list;
-  }, [query, colors, periods, units, skills, rarities, costs, layerActive]);
+  }, [query, colors, periods, units, skills, rarities, costs, stratCats, layerActive]);
 
   const recentCards = useMemo(
     () => recents.map((id) => CARD_BY_ID[id]).filter(Boolean),
@@ -191,7 +186,7 @@ export function ScoutApp() {
 
   const layerSummary = [
     colors.length ? colors.join(" ") : null,
-    costs.length ? costs.map(formatCost).join("/") + "C" : null,
+    costs.length ? costs.map(formatCost).join("/") + " Cost" : null,
     units.length ? units.map((u) => UNIT_SHORT[u as keyof typeof UNIT_SHORT] ?? u).join(" ") : null,
     periods.length ? periods.join(" ") : null,
   ]
@@ -206,6 +201,7 @@ export function ScoutApp() {
     setPeriods([]);
     setSkills([]);
     setRarities([]);
+    setStratCats([]);
   };
 
   const resultLabel = query || layerActive ? `${hits.length} 筆${layerSummary ? `　${layerSummary}` : ""}` : "";
@@ -339,7 +335,7 @@ export function ScoutApp() {
                 className={cn(
                   "flex-col gap-1 overflow-x-hidden",
                   filtersOpen ? "mt-2 flex max-h-[min(52vh,26rem)] overflow-y-auto" : "hidden",
-                  "lg:mt-3 lg:flex lg:max-h-none lg:overflow-visible",
+                  "lg:mt-3 lg:flex lg:max-h-[min(42vh,24rem)] lg:overflow-y-auto",
                 )}
               >
                 <FilterRule label="勢力" />
@@ -364,7 +360,7 @@ export function ScoutApp() {
                         active: costs.includes(c),
                         className: "bg-surface-2 text-fg ring-2 ring-inset ring-fg",
                         idleClassName: "bg-surface-2",
-                        ariaLabel: `${formatCost(c)} cost`,
+                        ariaLabel: `${formatCost(c)} Cost`,
                         toggle: () => toggle(costs, c, setCosts),
                       }))}
                     />
@@ -391,8 +387,8 @@ export function ScoutApp() {
                     aria-expanded={moreFilters}
                   >
                     更多篩選
-                    {periods.length + skills.length + rarities.length ? (
-                      <span className="tabular-nums">{periods.length + skills.length + rarities.length}</span>
+                    {periods.length + skills.length + rarities.length + stratCats.length ? (
+                      <span className="tabular-nums">{periods.length + skills.length + rarities.length + stratCats.length}</span>
                     ) : null}
                     {moreFilters ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
                   </button>
@@ -422,6 +418,17 @@ export function ScoutApp() {
                         toggle: () => toggle(skills, s.id, setSkills),
                       }))}
                     />
+                    <FilterRule label="計略類型" />
+                    <ChipGrid
+                      cols="grid-cols-4 sm:grid-cols-5"
+                      items={STRAT_CATS.map((cat) => ({
+                        key: cat,
+                        label: translateCat(cat),
+                        active: stratCats.includes(cat),
+                        ariaLabel: `計略 ${translateCat(cat)}`,
+                        toggle: () => toggle(stratCats, cat, setStratCats),
+                      }))}
+                    />
                     <FilterRule label="稀有" />
                     <ChipGrid
                       cols="grid-cols-4"
@@ -429,6 +436,8 @@ export function ScoutApp() {
                         key: r,
                         label: r,
                         active: rarities.includes(r),
+                        className: RARITY_CHIP[r].active,
+                        idleClassName: RARITY_CHIP[r].idle,
                         toggle: () => toggle(rarities, r, setRarities),
                       }))}
                     />
@@ -465,8 +474,7 @@ export function ScoutApp() {
             </div>
           </section>
 
-          {isDesktop ? (
-            <aside className="relative min-h-0 overflow-hidden">
+          <aside className="relative hidden min-h-0 overflow-hidden lg:block">
               {selected ? <CardThemeBackdrop card={selected} /> : null}
               <div className="relative z-10 h-full overflow-y-auto p-5">
                 {selected ? (
@@ -478,7 +486,6 @@ export function ScoutApp() {
                 )}
               </div>
             </aside>
-          ) : null}
         </div>
       )}
 
@@ -488,8 +495,8 @@ export function ScoutApp() {
         </div>
       ) : null}
 
-      {selected && (tab === "search" || tab === "recents") && (tab === "recents" || !isDesktop) ? (
-        <div className="absolute inset-0 z-50 flex min-h-0 flex-col bg-bg">
+      {selected && (tab === "search" || tab === "recents") ? (
+        <div className={cn("absolute inset-0 z-50 flex min-h-0 flex-col bg-bg", tab === "search" && "lg:hidden")}>
           <CardThemeBackdrop card={selected} />
           <button
             type="button"
@@ -503,7 +510,7 @@ export function ScoutApp() {
           >
             <X className="size-5" />
           </button>
-          <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-[max(3rem,calc(env(safe-area-inset-top)+2.5rem))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
             <CardDetail card={selected} />
           </div>
         </div>
@@ -533,13 +540,11 @@ function CardHitRow({
     >
       <span className={cn("h-7 w-1 shrink-0 rounded-full", COLOR_BAR[card.color])} aria-hidden />
       <div className="min-w-0 flex-1">
-        <p className="flex min-w-0 items-center gap-1.5 text-xs">
+        <div className="flex min-w-0 items-center gap-1.5 text-xs">
           <span className={cn("shrink-0 rounded-sm px-1 py-px font-medium", COLOR_CLASS[card.color])}>{card.no}</span>
           <UnitIcon unit={card.unit} title={card.unit} className="size-4" />
-          <span className={cn("shrink-0 text-[10px] font-semibold tracking-wide", RARITY_CLASS[card.rarity])}>
-            {card.rarity}
-          </span>
-          <span className="min-w-0 truncate font-medium text-fg">{card.name}</span>
+          <RarityMark rarity={card.rarity} className="shrink-0" />
+          <span className="min-w-0 truncate font-bold text-fg">{card.name}</span>
           <CostPips cost={card.cost} small />
           <span className="shrink-0 tabular-nums text-muted">
             /{card.power}/{card.intel}
@@ -549,7 +554,7 @@ function CardHitRow({
               <SkillList ids={card.skills} short />
             </span>
           ) : null}
-        </p>
+        </div>
         <p className="mt-0.5 truncate text-xs text-faint">
           <span className="text-fg">{card.stratName}</span>
           <span className="text-muted">　士氣{card.stratCost}</span>

@@ -5,6 +5,7 @@ const VARIANT: Record<string, string> = {
   國: "国",
   驅: "駆",
   氣: "気",
+  靈: "霊",
   劍: "剣",
   擊: "撃",
   傳: "伝",
@@ -123,6 +124,7 @@ export function filterCards(
     skills: number[];
     rarities: string[];
     costs: number[];
+    stratCats?: string[];
   },
 ): Card[] {
   return cards.filter((c) => {
@@ -132,6 +134,7 @@ export function filterCards(
     if (filters.rarities.length && !filters.rarities.includes(c.rarity)) return false;
     if (filters.costs.length && !filters.costs.includes(c.cost)) return false;
     if (filters.skills.length && !filters.skills.some((id) => c.skills.includes(id))) return false;
+    if (filters.stratCats?.length && !filters.stratCats.some((cat) => (c.stratCats ?? []).includes(cat))) return false;
     return true;
   });
 }

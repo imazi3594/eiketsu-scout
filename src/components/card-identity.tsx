@@ -1,7 +1,10 @@
 import {
+  COLOR_BAR,
   COLOR_CLASS,
   formatCost,
+  RARITY_CLASS,
   type Card,
+  type Rarity,
 } from "@/data/catalog";
 import { SkillList } from "@/components/skill-chip";
 import { UnitIcon } from "@/components/unit-icon";
@@ -17,7 +20,7 @@ export function CostPips({ cost, small, stacked }: { cost: number; small?: boole
     const rowPip = small ? "size-2" : "size-3";
     const rowClip = small ? "h-2 w-1" : "h-3 w-1.5";
     return (
-      <span className="inline-flex items-center gap-px" aria-label={`${formatCost(cost)} cost`} role="img">
+      <span className="inline-flex items-center gap-px" aria-label={`${formatCost(cost)} Cost`} role="img">
         {Array.from({ length: full }, (_, i) => (
           <span key={i} className={cn("shrink-0 rounded-full bg-cost", rowPip)} />
         ))}
@@ -38,7 +41,7 @@ export function CostPips({ cost, small, stacked }: { cost: number; small?: boole
   }
 
   return (
-    <span className="grid grid-cols-2 grid-rows-2 gap-px" aria-label={`${formatCost(cost)} cost`} role="img">
+    <span className="grid grid-cols-2 grid-rows-2 gap-px" aria-label={`${formatCost(cost)} Cost`} role="img">
       {slots.map((slot, i) =>
         slot === "full" ? (
           <span key={i} className={cn("rounded-full bg-cost", pip)} />
@@ -54,45 +57,77 @@ export function CostPips({ cost, small, stacked }: { cost: number; small?: boole
   );
 }
 
-export function CardIdentity({ card, compact }: { card: Card; compact?: boolean }) {
-  const NameTag = compact ? "p" : "h2";
+export function RarityMark({ rarity, className }: { rarity: Rarity; className?: string }) {
   return (
-    <div className={cn("min-w-0", !compact && "pr-8")}>
-      <p className="flex flex-wrap items-center gap-1.5 text-xs">
-        <span
-          className={cn(
-            "rounded-sm font-medium",
-            compact ? "px-1 py-px" : "px-1.5 py-0.5",
-            COLOR_CLASS[card.color],
-          )}
-        >
-          {card.no}
-        </span>
-        <span className="text-muted">{card.rarity}</span>
-        <span className="text-faint">{card.period}</span>
-      </p>
-      <NameTag
-        className={cn(
-          "mt-1 text-fg",
-          compact ? "truncate font-medium" : "font-display text-2xl leading-tight text-balance",
-        )}
-      >
-        {card.name}
-      </NameTag>
-      <p
-        className={cn(
-          "mt-1.5 flex flex-wrap items-center gap-2.5 tabular-nums",
-          compact ? "text-xs text-muted" : "text-sm text-muted",
-        )}
-      >
-        <CostPips cost={card.cost} />
-        <UnitIcon unit={card.unit} title={card.unit} className={compact ? "size-4" : "size-[1.15rem]"} />
-        <span>武 {card.power}</span>
-        <span>知 {card.intel}</span>
-      </p>
-      <div className={cn("mt-1.5", compact && "mt-1")}>
-        <SkillList ids={card.skills} compact={compact} />
+    <span className={cn("inline-block font-bold", RARITY_CLASS[rarity], className)}>
+      {rarity}
+    </span>
+  );
+}
+
+function CombatStat({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="inline-flex items-baseline gap-0.5">
+      <span className="font-display text-2xl font-bold tabular-nums leading-none text-fg">{value}</span>
+      <span className="text-xs text-faint">{label}</span>
+    </span>
+  );
+}
+
+export function CardIdentity({ card, compact }: { card: Card; compact?: boolean }) {
+  if (compact) {
+    return (
+      <div className="min-w-0">
+        <p className="flex flex-wrap items-center gap-1.5 text-xs">
+          <span className={cn("rounded-sm px-1 py-px font-medium", COLOR_CLASS[card.color])}>{card.no}</span>
+          <span className="text-faint">{card.period}</span>
+        </p>
+        <p className="mt-1 flex min-w-0 items-baseline gap-2 font-bold text-fg">
+          <RarityMark rarity={card.rarity} className="shrink-0" />
+          <span className="min-w-0 truncate">{card.name}</span>
+        </p>
+        <p className="mt-1.5 flex flex-wrap items-center gap-2.5 text-xs tabular-nums text-muted">
+          <CostPips cost={card.cost} />
+          <UnitIcon unit={card.unit} title={card.unit} className="size-4" />
+          <span>武 {card.power}</span>
+          <span>知 {card.intel}</span>
+        </p>
+        <div className="mt-1">
+          <SkillList ids={card.skills} compact />
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <section className="relative overflow-hidden rounded-lg border border-white/10 bg-black/35">
+      <div className={cn("absolute inset-y-0 left-0 w-1", COLOR_BAR[card.color])} aria-hidden />
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 p-3 pl-4">
+        <p className="flex flex-wrap items-center gap-1.5 text-xs">
+          <span className={cn("rounded-sm px-1.5 py-0.5 font-medium", COLOR_CLASS[card.color])}>{card.no}</span>
+          <span className="text-faint">{card.period}</span>
+        </p>
+        <div className="flex items-center justify-end gap-1 text-fg">
+          <UnitIcon unit={card.unit} title={card.unit} className="size-5" />
+          <span className="text-sm font-medium">{card.unit}</span>
+        </div>
+
+        <h2 className="flex min-w-0 items-baseline gap-2 font-display text-2xl font-bold leading-none text-balance text-fg">
+          <RarityMark rarity={card.rarity} className="shrink-0" />
+          <span className="min-w-0">{card.name}</span>
+        </h2>
+        <div className="flex items-baseline justify-end gap-3">
+          <CombatStat label="武" value={card.power} />
+          <CombatStat label="知" value={card.intel} />
+        </div>
+
+        <div className="min-w-0">
+          <SkillList ids={card.skills} />
+        </div>
+        <div className="flex justify-end">
+          <CostPips cost={card.cost} />
+        </div>
+      </div>
+    </section>
   );
 }

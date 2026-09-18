@@ -88,7 +88,48 @@ export const RARITY_CLASS: Record<Rarity, string> = {
   SR: "text-cost",
   ER: "rarity-er",
 };
+export const RARITY_CHIP: Record<Rarity, { idle: string; active: string }> = {
+  N: {
+    idle: "bg-muted/70 font-bold text-bg",
+    active: "bg-muted font-bold text-bg ring-2 ring-inset ring-fg",
+  },
+  R: {
+    idle: "bg-rarity-r/70 font-bold text-bg",
+    active: "bg-rarity-r font-bold text-bg ring-2 ring-inset ring-fg",
+  },
+  SR: {
+    idle: "bg-cost/70 font-bold text-black",
+    active: "bg-cost font-bold text-black ring-2 ring-inset ring-fg",
+  },
+  ER: {
+    idle: "rarity-er-chip font-bold",
+    active: "rarity-er-chip font-bold ring-2 ring-inset ring-fg",
+  },
+};
 export const COSTS = [1, 1.5, 2, 2.5, 3, 3.5, 4];
+
+/** 計略類型。順序：基本強化／妨害 → 陣形節奏 → 特殊。 */
+export const STRAT_CATS = [
+  "強化",
+  "全体強化",
+  "回復",
+  "妨害",
+  "ダメージ",
+  "復活",
+  "陣形",
+  "旗陣形",
+  "ため計略",
+  "渾身",
+  "琥煌",
+  "黄熾",
+  "短計",
+  "舞い",
+  "反計",
+  "式神",
+  "詠歌",
+  "拠点",
+  "特殊",
+] as const;
 
 export const UNIT_SHORT: Record<UnitName, string> = {
   騎兵: "騎",
@@ -212,7 +253,7 @@ export const SKILLS: SkillDef[] = [
     kind: "combat",
     facts: [
       { label: "鎖定時間", value: "2 秒（約 0.8C）" },
-      { label: "追加傷害", value: "成本愈高愈強；2.5C 時每擊約 +0.5%" },
+      { label: "追加傷害", value: "成本愈高愈強；2.5 Cost 時每擊約 +0.5%" },
     ],
     durationC: "鎖定 0.8C",
   },
@@ -222,16 +263,16 @@ export const SKILLS: SkillDef[] = [
     short: "昂",
     official: "コストに応じて士気が増加した状態で開戦します。",
     detail:
-      "開場即加士氣。持有昂揚的武將成本每 0.5C，士氣 ＋0.1（合計 5.0C ＝ 士氣 1）。同一張卡有兩個昂揚會再倍增。",
+      "開場即加士氣。持有昂揚的武將成本每 0.5 Cost，士氣 ＋0.1（合計 5.0 Cost ＝ 士氣 1）。同一張卡有兩個昂揚會再倍增。",
     playTip: "把對手昂揚成本加總 ×0.2 即為額外開場士氣。高昂揚卡組會搶先手計略。",
     kind: "open",
     facts: [
       { label: "公式", value: "士氣 ＋（昂揚成本合計 × 0.2）" },
-      { label: "1.0C", value: "＋0.2 士氣" },
-      { label: "2.0C", value: "＋0.4 士氣" },
-      { label: "2.5C", value: "＋0.5 士氣" },
-      { label: "3.0C", value: "＋0.6 士氣" },
-      { label: "3.5C", value: "＋0.7 士氣" },
+      { label: "1.0 Cost", value: "＋0.2 士氣" },
+      { label: "2.0 Cost", value: "＋0.4 士氣" },
+      { label: "2.5 Cost", value: "＋0.5 士氣" },
+      { label: "3.0 Cost", value: "＋0.6 士氣" },
+      { label: "3.5 Cost", value: "＋0.7 士氣" },
     ],
   },
   {
@@ -240,14 +281,14 @@ export const SKILLS: SkillDef[] = [
     short: "技",
     official: "コストに応じて流派ゲージが増加した状態で開戦します。",
     detail:
-      "開場增加流派槽。持有技巧的武將成本每 0.5C，流派槽 ＋1/60（合計 5.0C ＝ 整條槽的 1/6）。",
+      "開場增加流派槽。持有技巧的武將成本每 0.5 Cost，流派槽 ＋1/60（合計 5.0 Cost ＝ 整條槽的 1/6）。",
     playTip: "技巧多的卡組中期會突然變強。盡早打斷其流派節奏。",
     kind: "open",
     facts: [
       { label: "公式", value: "槽 ＋（技巧成本合計 ÷ 30）條" },
-      { label: "1.5C", value: "約 5.0%" },
-      { label: "2.5C", value: "約 8.3%" },
-      { label: "5.0C", value: "約 16.7%（1/6 條）" },
+      { label: "1.5 Cost", value: "約 5.0%" },
+      { label: "2.5 Cost", value: "約 8.3%" },
+      { label: "5.0 Cost", value: "約 16.7%（1/6 條）" },
     ],
   },
   {
@@ -303,10 +344,10 @@ export const SKILLS: SkillDef[] = [
     playTip: "看對手時代是否集中。同時代大兵隊要用範圍傷害或計略處理。",
     kind: "open",
     facts: [
-      { label: "合計 1.0C", value: "最大兵力 ＋約 5%" },
-      { label: "合計 2.0C", value: "＋約 10%" },
-      { label: "合計 4.0C", value: "＋約 15%" },
-      { label: "合計 9.0C", value: "＋約 30%" },
+      { label: "合計 1.0 Cost", value: "最大兵力 ＋約 5%" },
+      { label: "合計 2.0 Cost", value: "＋約 10%" },
+      { label: "合計 4.0 Cost", value: "＋約 15%" },
+      { label: "合計 9.0 Cost", value: "＋約 30%" },
     ],
   },
   {
@@ -329,12 +370,12 @@ export const SKILLS: SkillDef[] = [
     playTip: "不要對槍線正面衝。側繞、伏兵或遠程處理。",
     kind: "combat",
     facts: [
-      { label: "1.0C 槍擊", value: "＋約 0.6%" },
-      { label: "1.5C", value: "＋約 0.8%" },
-      { label: "2.0C", value: "＋約 1.0%" },
-      { label: "2.5C", value: "＋約 1.2%" },
-      { label: "3.0C", value: "＋約 1.4%" },
-      { label: "3.5C", value: "槍擊 ＋約 1.6%　槍長 ＋約 45%" },
+      { label: "1.0 Cost 槍擊", value: "＋約 0.6%" },
+      { label: "1.5 Cost", value: "＋約 0.8%" },
+      { label: "2.0 Cost", value: "＋約 1.0%" },
+      { label: "2.5 Cost", value: "＋約 1.2%" },
+      { label: "3.0 Cost", value: "＋約 1.4%" },
+      { label: "3.5 Cost", value: "槍擊 ＋約 1.6%　槍長 ＋約 45%" },
     ],
   },
   {
@@ -362,7 +403,7 @@ export const SKILLS: SkillDef[] = [
     kind: "gauge",
     facts: [
       { label: "霸氣累積", value: "約 1.3 倍" },
-      { label: "呼應傷害", value: "合計 1C ＋0.3%　2C ＋0.6%　3C ＋0.9%　6C ＋1.8%" },
+      { label: "呼應傷害", value: "合計 1 Cost ＋0.3%　2 Cost ＋0.6%　3 Cost ＋0.9%　6 Cost ＋1.8%" },
     ],
   },
   {
@@ -380,6 +421,21 @@ export const SKILLS: SkillDef[] = [
       { label: "100% / 200%", value: "武知 ＋1 / ＋2" },
     ],
   },
+  {
+    id: 17,
+    name: "霊力",
+    short: "霊",
+    official: "特技「霊力」を持つ武将の武将コスト合計に応じて最大兵力が上がります。",
+    detail:
+      "與持有「靈力」的武將成本合計愈高，最大兵力愈高。『櫻花大戰』卡組的核心特技，同時代無關。",
+    playTip: "靈力隊會特別肉。合計 2.5 Cost 約 ＋10%，7.5 Cost（前半四張齊）約 ＋25%。用範圍傷害或計略處理。",
+    kind: "open",
+    facts: [
+      { label: "公式", value: "最大兵力 ＋（靈力成本合計 × 約 4%）" },
+      { label: "合計 2.5 Cost", value: "＋約 10%" },
+      { label: "合計 7.5 Cost", value: "＋約 25%" },
+    ],
+  },
 ];
 
 const payload = raw as { count: number; cards: Card[] };
@@ -388,10 +444,10 @@ export const CARD_COUNT = payload.count;
 
 /** 資料對應的遊戲版與擷取日，下次 scrape 記得改。 */
 export const DATA_META = {
-  gameVer: "3.5.0G",
-  pack: "第６彈 古幻相剋の八象",
-  gameDate: "2026-08-19",
-  dataDate: "2026-09-13",
+  gameVer: "3.5.0H",
+  pack: "第６彈 古幻相剋の八象　『サクラ大戦』コラボ前半",
+  gameDate: "2026-09-16",
+  dataDate: "2026-09-18",
 } as const;
 
 export const CARD_BY_ID: Record<string, Card> = Object.fromEntries(CARDS.map((c) => [c.id, c]));
@@ -410,6 +466,11 @@ export function officialUrl(card: Card): string {
 
 export function formatCost(n: number): string {
   return n.toFixed(1);
+}
+
+/** 武將成本。寫 Cost 以免與時間單位 C（1C＝2.4 秒）混淆。 */
+export function costLabel(n: number): string {
+  return `${formatCost(n)} Cost`;
 }
 
 export function formatCount(c: number): string {
@@ -434,7 +495,7 @@ export function gikouFromCost(cost: number): number {
   return Math.round((cost / 30) * 1000) / 10;
 }
 
-/** 槍術槍擊傷害加成（%）。1.0C→0.6，之後每 0.5C ＋0.2。 */
+/** 槍術槍擊傷害加成（%）。1.0 Cost→0.6，之後每 0.5 Cost ＋0.2。 */
 export function spearDamageBonus(cost: number): number {
   return Math.round((0.2 + cost * 0.4) * 10) / 10;
 }
@@ -477,7 +538,7 @@ export function compactSkill(card: Card, id: number): string {
     case 10:
       return card.unit === "騎兵" ? `${name} ＋5%` : `${name} ＋10%`;
     case 11:
-      return `${name} ${formatCost(card.cost)}C`;
+      return `${name} ${costLabel(card.cost)}`;
     case 12:
       return `${name} ＋${copies}`;
     case 13:
@@ -485,7 +546,9 @@ export function compactSkill(card: Card, id: number): string {
     case 14:
       return `${name} 衰 1.3C`;
     case 15:
-      return `${name} ${formatCost(card.cost)}C`;
+      return `${name} ${costLabel(card.cost)}`;
+    case 17:
+      return `${name} ${costLabel(card.cost)}`;
     default:
       return name;
   }
@@ -507,6 +570,10 @@ export function stratTimeNote(time: string): string {
   }
 }
 
+function isKyotenCard(card: Card): boolean {
+  return (card.stratCats ?? []).includes("拠点");
+}
+
 function durQualifier(note: string): string {
   if (!note) return "";
   if (note.includes("以上")) return "以上";
@@ -522,11 +589,12 @@ function parseDurationValue(value: string): { durC: number; depC: number | null 
   return { durC: Number(match[1]), depC: dep ? Number(dep[1]) : null };
 }
 
-function durationRank(effect: CardEffect): number {
+function durationRank(effect: CardEffect, kyoten: boolean): number {
   const { label, value } = effect;
   if (/^[+＋]/.test(value.trim())) return -1;
   if (/(撃破時|追加|攻城時)/.test(label)) return -1;
   if (/基本/.test(label)) return 100;
+  if (kyoten && /最大/.test(label)) return 96;
   if (label === "効果時間" && /知力依存/.test(value)) return 90;
   if (/自身|味方/.test(label) && /知力依存/.test(value)) return 85;
   if (label === "効果時間") return 40;
@@ -536,11 +604,12 @@ function durationRank(effect: CardEffect): number {
 }
 
 function pickMainDurationEffect(card: Card): CardEffect | null {
+  const kyoten = isKyotenCard(card);
   let best: CardEffect | null = null;
   let bestRank = -1;
   for (const effect of mainEffects(card)) {
     if (!effect.label.startsWith("効果時間")) continue;
-    const rank = durationRank(effect);
+    const rank = durationRank(effect, kyoten);
     if (rank > bestRank) {
       best = effect;
       bestRank = rank;
@@ -549,33 +618,55 @@ function pickMainDurationEffect(card: Card): CardEffect | null {
   return best;
 }
 
-/** 本計時長：優先 効果時間(基本)，有短計時勿取短計那一條。 */
-function pickMainDuration(card: Card): { durC: number | null; depC: number | null; note: string } {
+function rippleIntervalC(card: Card): number | null {
+  const hit = (card.effects ?? []).find((effect) => effect.label.includes("波紋発生間隔"));
+  return hit ? (parseDurationValue(hit.value)?.durC ?? null) : null;
+}
+
+/** 本計時長：據點用効果時間(最大)；有短計時勿取短計那一條。 */
+function pickMainDuration(card: Card): {
+  durC: number | null;
+  depC: number | null;
+  note: string;
+  cap: boolean;
+} {
   const preferred = pickMainDurationEffect(card);
   if (preferred) {
     const parsed = parseDurationValue(preferred.value);
-    if (parsed) return { durC: parsed.durC, depC: parsed.depC ?? card.depC, note: preferred.value };
+    if (parsed) {
+      return {
+        durC: parsed.durC,
+        depC: parsed.depC ?? card.depC,
+        note: preferred.value,
+        cap: /最大/.test(preferred.label),
+      };
+    }
   }
-  return { durC: card.durC, depC: card.depC, note: card.durNote };
+  return { durC: card.durC, depC: card.depC, note: card.durNote, cap: false };
 }
 
 export function formatStratDuration(card: Card): StratDuration {
   const picked = pickMainDuration(card);
   const q = durQualifier(picked.note);
-  const hint = stratTimeNote(card.stratTime);
+  const kyotenCap = picked.cap && isKyotenCard(card);
+  const suffix = kyotenCap ? [q, "上限"].filter(Boolean).join("") : q;
+  const hint = kyotenCap
+    ? "時長為據點上限。對手破壞據點會提早結束。波紋時長是據點放出的效果，不是計略時長。"
+    : stratTimeNote(card.stratTime);
   if (picked.durC != null) {
     const core = formatCount(picked.durC);
-    const label = q ? `${core} ${q}` : core;
-    const compact = q ? `${core}${q}` : core;
+    const label = suffix ? `${core} ${suffix}` : core;
+    const compact = suffix ? `${core}${suffix}` : core;
     const dep =
-      picked.depC != null
+      picked.depC != null && !kyotenCap
         ? `知力依存 ${formatCount(picked.depC)}／知力`
         : card.stratTime === "固定時間"
           ? "固定時長，不隨知力"
           : "";
     const extraBits: string[] = [];
-    if (card.stratTime === "撤退するまで") extraBits.push("直至撤退");
-    if (card.stratTime === "一瞬") extraBits.push("官方分類：一瞬");
+    if (kyotenCap) extraBits.push("據點可被破壞而縮短");
+    else if (card.stratTime === "撤退するまで") extraBits.push("直至撤退");
+    else if (card.stratTime === "一瞬") extraBits.push("官方分類：一瞬");
     return {
       compact,
       label,
@@ -603,7 +694,7 @@ export function formatStratDuration(card: Card): StratDuration {
 }
 
 export function displayEffects(card: Card): StatLine[] {
-  return effectRows(mainEffects(card), pickMainDurationEffect(card));
+  return effectRows(mainEffects(card), pickMainDurationEffect(card), rippleIntervalC(card));
 }
 
 /** 紫勢力渾身：eiketsudb 由弱至強（無→弱→強），畫面由左至右 強｜弱｜無。 */
@@ -674,7 +765,7 @@ function collapseKonshinGroups(groups: CardEffect[][]): CardEffect[][] {
   return [groups[0], groups[1], groups.slice(2).flat()];
 }
 
-function effectRows(effects: CardEffect[], hide?: CardEffect | null): StatLine[] {
+function effectRows(effects: CardEffect[], hide?: CardEffect | null, rippleC?: number | null): StatLine[] {
   const rows: StatLine[] = [];
   const seen = new Set<string>();
   for (const effect of effects) {
@@ -683,7 +774,12 @@ function effectRows(effects: CardEffect[], hide?: CardEffect | null): StatLine[]
     } else if (isDurationEffectLabel(effect.label) || effect.label.startsWith("効果時間")) {
       continue;
     }
-    const label = translateLabel(effect.label);
+    let rawLabel = effect.label;
+    if (rippleC != null && effect.label === "効果時間") {
+      const parsed = parseDurationValue(effect.value);
+      if (parsed && Math.abs(parsed.durC - rippleC) < 0.05) rawLabel = "波紋効果時間";
+    }
+    const label = translateLabel(rawLabel);
     const value = translateValue(effect.value);
     const key = `${label}|${value}`;
     if (seen.has(key)) continue;
@@ -967,21 +1063,21 @@ export function skillCardFacts(card: Card, skillId: number): StatLine[] {
     case 5:
       return [
         { label: "鎖定", value: "2 秒（約 0.8C）" },
-        { label: "此卡成本", value: `${formatCost(card.cost)}C　追加傷害隨 C 上升` },
-        { label: "參考", value: "2.5C 時每擊約 +0.5%" },
+        { label: "此卡成本", value: `${costLabel(card.cost)}　追加傷害隨 Cost 上升` },
+        { label: "參考", value: "2.5 Cost 時每擊約 +0.5%" },
       ];
     case 6:
       return [
         {
           label: "開場士氣",
-          value: `＋${koageFromCost(card.cost * copies)}　（${formatCost(card.cost)}C × 0.2${copies > 1 ? ` ×${copies}` : ""}）`,
+          value: `＋${koageFromCost(card.cost * copies)}　（${costLabel(card.cost)} × 0.2${copies > 1 ? ` ×${copies}` : ""}）`,
         },
       ];
     case 7:
       return [
         {
           label: "開場流派槽",
-          value: `約 ${gikouFromCost(card.cost * copies)}%　（${formatCost(card.cost)}C${copies > 1 ? ` ×${copies}` : ""}）`,
+          value: `約 ${gikouFromCost(card.cost * copies)}%　（${costLabel(card.cost)}${copies > 1 ? ` ×${copies}` : ""}）`,
         },
       ];
     case 8:
@@ -992,7 +1088,7 @@ export function skillCardFacts(card: Card, skillId: number): StatLine[] {
     case 10:
       return [{ label: "此卡移速", value: card.unit === "騎兵" ? "＋約 5%" : "＋約 10%" }];
     case 11:
-      return [{ label: "此卡貢獻", value: `${formatCost(card.cost)}C（同時代大兵合計）` }];
+      return [{ label: "此卡貢獻", value: `${costLabel(card.cost)}（同時代大兵合計）` }];
     case 12:
       return [{ label: "最大士氣", value: `＋${copies}（上限 15）` }];
     case 13:
@@ -1000,7 +1096,7 @@ export function skillCardFacts(card: Card, skillId: number): StatLine[] {
         { label: "此卡槍擊", value: `＋約 ${spearDamageBonus(card.cost)}%` },
         {
           label: "槍長",
-          value: `${formatCost(card.cost)}C 加長${card.cost >= 3.5 ? "（約 ＋45%）" : "（3.5C 約 ＋45%）"}`,
+          value: `${costLabel(card.cost)} 加長${card.cost >= 3.5 ? "（約 ＋45%）" : "（3.5 Cost 約 ＋45%）"}`,
         },
       ];
     case 14:
@@ -1011,12 +1107,19 @@ export function skillCardFacts(card: Card, skillId: number): StatLine[] {
     case 15:
       return [
         { label: "霸氣累積", value: "約 1.3 倍" },
-        { label: "英傑呼應", value: `此卡 ${formatCost(card.cost)}C 約 ＋${hakiCallBonus(card.cost)}%` },
+        { label: "英傑呼應", value: `此卡 ${costLabel(card.cost)} 約 ＋${hakiCallBonus(card.cost)}%` },
       ];
     case 16:
       return [
         { label: "槽增加", value: "造成傷害的 60%" },
         { label: "100% / 200%", value: "武知 ＋1 / ＋2" },
+      ];
+    case 17:
+      return [
+        {
+          label: "此卡貢獻",
+          value: `${costLabel(card.cost * copies)}　最大兵力 ＋約 ${Math.round(card.cost * copies * 4 * 10) / 10}%`,
+        },
       ];
     default:
       return [];
