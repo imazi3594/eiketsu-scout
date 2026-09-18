@@ -9,7 +9,7 @@ const outDir = fileURLToPath(new URL("./docs", import.meta.url));
 
 export default defineConfig({
   root: spaRoot,
-  base: "/eiketsu-scout/",
+  base: "/ek-scout/",
   publicDir: fileURLToPath(new URL("./spa/public", import.meta.url)),
   plugins: [tailwindcss(), viteReact()],
   resolve: {
