@@ -9,6 +9,7 @@ import {
   kokouTiers,
   konshinTiers,
   officialUrl,
+  splitEffectValue,
   type Card,
   type KokouTiers,
   type KonshinTier,
@@ -139,10 +140,30 @@ function EffectList({ rows }: { rows: StatLine[] }) {
 }
 
 function EffectRow({ row }: { row: StatLine }) {
+  const { note, lines } = splitEffectValue(row.value);
+  const listed = note || lines.length > 1;
+  if (!listed) {
+    return (
+      <div className="flex items-baseline justify-between gap-3 rounded-md bg-surface-2 px-2.5 py-1.5">
+        <dt className="shrink-0 text-xs text-faint">{row.label}</dt>
+        <dd className="text-right text-sm leading-relaxed text-pretty tabular-nums text-fg">{row.value}</dd>
+      </div>
+    );
+  }
   return (
-    <div className="flex items-baseline justify-between gap-3 rounded-md bg-surface-2 px-2.5 py-1.5">
-      <dt className="shrink-0 text-xs text-faint">{row.label}</dt>
-      <dd className="text-right text-sm leading-relaxed text-pretty tabular-nums text-fg">{row.value}</dd>
+    <div className="rounded-md bg-surface-2 px-2.5 py-1.5">
+      <dt className="text-xs text-faint">{row.label}</dt>
+      <dd className="mt-1">
+        {note ? <p className="mb-0.5 text-xs leading-relaxed text-muted">{note}</p> : null}
+        <ul className="space-y-0.5">
+          {lines.map((line) => (
+            <li key={line} className="text-sm leading-relaxed tabular-nums text-fg">
+              <span className="text-faint">，</span>
+              {line}
+            </li>
+          ))}
+        </ul>
+      </dd>
     </div>
   );
 }

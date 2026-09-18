@@ -37,6 +37,46 @@ export type Card = {
 
 export type StatLine = { label: string; value: string };
 
+const STAT_VALUE = String.raw`[+\-＋－約]\S+|\d+(?:\.\d+)?秒ごと\S+`;
+const UNIT_KEY = "騎兵|槍兵|弓兵|剣豪|鉄砲隊";
+
+/** Break cramped scale tables (黃熾槽／兵力／成本…) into one line per tier. */
+export function splitEffectValue(value: string): { note: string; lines: string[] } {
+  const s = value.replace(/\s+/g, " ").trim();
+  if (!s) return { note: "", lines: [] };
+
+  let text = s.replace(new RegExp(String.raw`(${STAT_VALUE})\s+(?=\S[^:]{0,48}:\s*(?:${STAT_VALUE}))`, "g"), "$1\n");
+  if ((s.match(new RegExp(`(?:${UNIT_KEY}):`, "g")) ?? []).length >= 2) {
+    text = text.replace(new RegExp(String.raw`(?<=\S)\s+(?=(?:${UNIT_KEY})\s*:)`, "g"), "\n");
+  }
+
+  let lines = text
+    .split("\n")
+    .map((x) => x.trim())
+    .filter(Boolean);
+  if (lines.length < 2) return { note: "", lines: [s] };
+
+  const lead = lines[0].match(new RegExp(String.raw`^(.*?)\s+(\S[^:]*:\s*(?:${STAT_VALUE}))$`));
+  if (lead?.[1]?.trim()) {
+    const maybeNote = lead[1].trim();
+    const maybeFirst = lead[2].trim();
+    const next = lines[1] ?? "";
+    const falsePeel = next.startsWith(maybeNote) && !maybeFirst.startsWith(maybeNote);
+    if (!falsePeel) {
+      lines = [maybeNote, maybeFirst, ...lines.slice(1)];
+    }
+  }
+
+  if (!/[:：]/.test(lines[0])) {
+    return { note: lines[0], lines: lines.slice(1).map(tidyPair) };
+  }
+  return { note: "", lines: lines.map(tidyPair) };
+}
+
+function tidyPair(line: string): string {
+  return line.replace(/\s*:\s*/, " : ").replace(/\s+/g, " ").trim();
+}
+
 export type KonshinTierId = "strong" | "weak" | "none";
 
 export type KonshinTier = {
