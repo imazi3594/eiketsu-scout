@@ -17,7 +17,6 @@ import {
 } from "@/data/catalog";
 import { Button } from "@/components/ui/button";
 import { CardIdentity } from "@/components/card-identity";
-import { UnitIcon } from "@/components/unit-icon";
 import { cn } from "@/lib/utils";
 
 function MoraleCost({ cost }: { cost: number | string }) {
@@ -225,11 +224,27 @@ function KokouGrid({ data }: { data: KokouTiers }) {
 
 function KokouSwords({ n }: { n: number }) {
   return (
-    <span className="inline-flex items-center gap-0.5 text-faction-ko" role="img" aria-label={`${n}劍`}>
+    <span className="inline-flex items-center gap-1" role="img" aria-label={`${n}劍`}>
       {Array.from({ length: n }, (_, i) => (
-        <UnitIcon key={i} unit="剣豪" className="size-4" />
+        <KokouSwordMark key={i} />
       ))}
     </span>
+  );
+}
+
+/** 🗡️-shaped pip, 琥色偏亮。 */
+function KokouSwordMark() {
+  return (
+    <svg viewBox="0 0 32 32" className="size-5 shrink-0 drop-shadow-[0_0_3px_#ffb340]" aria-hidden>
+      <g transform="rotate(48 16 16)">
+        <path d="M16 1.6 19.4 16.2H12.6Z" fill="#ffc45c" />
+        <path d="M16 3.1 16.9 16H15.1Z" fill="#fff6d4" />
+        <rect x="8.6" y="15.6" width="14.8" height="2.8" rx="1.1" fill="#ffb340" />
+        <rect x="13.7" y="18.2" width="4.6" height="7.4" rx="1.15" fill="#f08c18" />
+        <circle cx="16" cy="26.6" r="2.55" fill="#ffc45c" />
+        <circle cx="16" cy="26.6" r="1.15" fill="#fff3c4" />
+      </g>
+    </svg>
   );
 }
 

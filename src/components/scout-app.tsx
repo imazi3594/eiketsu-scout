@@ -128,8 +128,7 @@ export function ScoutApp() {
       return;
     }
     setTab(next);
-    if (next !== "search") select(null);
-    pushView(histOf(next, null, false));
+    pushView(histOf(next, selectedId, false));
   }
 
   useEffect(() => {
@@ -222,47 +221,48 @@ export function ScoutApp() {
         </nav>
       </header>
 
-      {tab === "about" ? (
-        <AboutPage />
-      ) : tab === "skills" ? (
-        <main className="mx-auto w-full max-w-3xl min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-          <p className="text-sm leading-relaxed text-pretty text-muted">
-            1C＝2.4 秒，全場 99C。以下為各特技的持續／成本換算。計略的具體 C 數見於武將詳情。
-          </p>
-          <p className="mt-1 text-xs tabular-nums text-faint">5C＝12秒　10C＝24秒　50C＝120秒　先陣約 49C</p>
-          <div className="mt-5 flex flex-col gap-3">
-            {SKILLS.map((s) => (
-              <SkillExplain key={s.id} id={s.id} />
-            ))}
-          </div>
-        </main>
-      ) : tab === "recents" ? (
-        <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col">
-          <p className="shrink-0 px-4 pt-3 pb-1 text-xs tabular-nums text-faint sm:px-6">
-            {recents.length ? `最近 ${recents.length} 張` : "最近查看"}
-          </p>
-          <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2 sm:px-4">
-            {recentCards.length ? (
-              recentCards.map((card) => (
-                <li key={card.id}>
-                  <CardHitRow
-                    card={card}
-                    active={card.id === selectedId}
-                    onOpen={() => {
-                      select(card.id);
-                      pushView({ v: "card", id: card.id });
-                    }}
-                  />
-                </li>
-              ))
-            ) : (
-              <li className="px-3 py-16 text-center text-sm text-muted">尚未查看武將。在速查開啟過即會顯示於此。</li>
-            )}
-          </ul>
-        </main>
-      ) : (
-        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
-          <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-border lg:border-r">
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
+        <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-border lg:border-r">
+          {tab === "about" ? (
+            <AboutPage />
+          ) : tab === "skills" ? (
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+              <p className="text-sm leading-relaxed text-pretty text-muted">
+                1C＝2.4 秒，全場 99C。以下為各特技的持續／成本換算。計略的具體 C 數見於武將詳情。
+              </p>
+              <p className="mt-1 text-xs tabular-nums text-faint">5C＝12秒　10C＝24秒　50C＝120秒　先陣約 49C</p>
+              <div className="mt-5 flex flex-col gap-3">
+                {SKILLS.map((s) => (
+                  <SkillExplain key={s.id} id={s.id} />
+                ))}
+              </div>
+            </div>
+          ) : tab === "recents" ? (
+            <>
+              <p className="shrink-0 px-4 pt-3 pb-1 text-xs tabular-nums text-faint sm:px-6">
+                {recents.length ? `最近 ${recents.length} 張` : "最近查看"}
+              </p>
+              <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2 sm:px-4">
+                {recentCards.length ? (
+                  recentCards.map((card) => (
+                    <li key={card.id}>
+                      <CardHitRow
+                        card={card}
+                        active={card.id === selectedId}
+                        onOpen={() => {
+                          select(card.id);
+                          pushView({ v: "card", id: card.id });
+                        }}
+                      />
+                    </li>
+                  ))
+                ) : (
+                  <li className="px-3 py-16 text-center text-sm text-muted">尚未查看武將。在速查開啟過即會顯示於此。</li>
+                )}
+              </ul>
+            </>
+          ) : (
+            <>
             <div className="shrink-0 border-b border-border bg-bg/60 px-4 py-2.5 backdrop-blur-sm sm:px-6">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-faint" />
@@ -472,22 +472,23 @@ export function ScoutApp() {
                 </ul>
               )}
             </div>
-          </section>
+          </>
+          )}
+        </section>
 
-          <aside className="relative hidden min-h-0 overflow-hidden lg:block">
-              {selected ? <CardThemeBackdrop card={selected} /> : null}
-              <div className="relative z-10 h-full overflow-y-auto p-5">
-                {selected ? (
-                  <CardDetail card={selected} />
-                ) : (
-                  <p className="text-sm leading-relaxed text-pretty text-muted">
-                    選擇一張武將，即可查看計略時長與效果值。
-                  </p>
-                )}
-              </div>
-            </aside>
-        </div>
-      )}
+        <aside className="relative hidden min-h-0 overflow-hidden lg:block">
+          {selected ? <CardThemeBackdrop card={selected} /> : null}
+          <div className="relative z-10 h-full overflow-y-auto p-5">
+            {selected ? (
+              <CardDetail card={selected} />
+            ) : (
+              <p className="text-sm leading-relaxed text-pretty text-muted">
+                選擇一張武將，即可查看計略時長與效果值。
+              </p>
+            )}
+          </div>
+        </aside>
+      </div>
 
       {exitHint ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-[70] flex justify-center px-4">
@@ -496,7 +497,7 @@ export function ScoutApp() {
       ) : null}
 
       {selected && (tab === "search" || tab === "recents") ? (
-        <div className={cn("absolute inset-0 z-50 flex min-h-0 flex-col bg-bg", tab === "search" && "lg:hidden")}>
+        <div className="absolute inset-0 z-50 flex min-h-0 flex-col bg-bg lg:hidden">
           <CardThemeBackdrop card={selected} />
           <button
             type="button"

@@ -56,7 +56,7 @@ export function AboutPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-y-auto px-4 py-6 sm:px-6">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6 sm:px-6">
       <div className="flex flex-col items-center text-center">
         <img
           src={`${import.meta.env.BASE_URL}icons/icon-192.png`}
@@ -164,6 +164,6 @@ export function AboutPage() {
           </a>
         </p>
       </section>
-    </main>
+    </div>
   );
 }
