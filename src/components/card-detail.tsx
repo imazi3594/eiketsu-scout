@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import {
   cardTanken,
+  cardSpecial,
   displayArea,
   displayCats,
   displayEffects,
@@ -15,6 +16,7 @@ import {
   type KokouTiers,
   type KonshinTier,
   type ShukuseiTier,
+  type SpecialBlock,
   type StatLine,
   type Tanken,
 } from "@/data/catalog";
@@ -53,6 +55,7 @@ export function CardDetail({ card }: { card: Card }) {
   const area = displayArea(card);
   const desc = displayMainStratDesc(card);
   const tankens = cardTanken(card);
+  const special = cardSpecial(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
   const hasData = Boolean(konshin || kokou || shukusei || effects.length || area || duration.label);
 
@@ -101,6 +104,8 @@ export function CardDetail({ card }: { card: Card }) {
         </section>
       ) : null}
 
+      {special ? <SpecialBox block={special} /> : null}
+
       {tankens.map((tanken) => (
         <TankenBox key={tanken.name} tanken={tanken} />
       ))}
@@ -135,6 +140,25 @@ function TankenBox({ tanken }: { tanken: Tanken }) {
       </div>
       {tanken.text ? <p className="mt-3 text-sm leading-relaxed text-pretty text-fg">{tanken.text}</p> : null}
       {tanken.rows.length ? <EffectList rows={tanken.rows} /> : null}
+    </section>
+  );
+}
+
+function SpecialBox({ block }: { block: SpecialBlock }) {
+  return (
+    <section className="rounded-lg border border-white/10 bg-black/35 p-4">
+      <p className="text-xs text-faint">特殊效果</p>
+      <ul className="mt-3 space-y-1.5">
+        {block.items.map((item) => (
+          <li key={`${item.key}-${item.text}`} className="flex gap-2 rounded-md bg-surface-2 px-2.5 py-1.5">
+            <span className="text-faint">·</span>
+            <span className="min-w-0">
+              <span className="text-xs text-muted">{item.key}</span>
+              <span className="text-sm leading-relaxed text-pretty text-fg">　{item.text}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

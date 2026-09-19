@@ -743,7 +743,16 @@ export function formatStratDuration(card: Card): StratDuration {
 }
 
 export function displayEffects(card: Card): StatLine[] {
-  return effectRows(mainEffects(card), pickMainDurationEffect(card), rippleIntervalC(card));
+  const { items } = parseSpecialBranches(card.stratDesc ?? "");
+  const effects = mainEffects(card).map((effect) => ({
+    ...effect,
+    value: stripBranchTail(effect.value),
+  }));
+  const filtered =
+    items.length >= 2
+      ? effects.filter((effect) => effect.label !== "特殊効果" || !isBranchFragment(effect.value, items))
+      : effects;
+  return effectRows(filtered, pickMainDurationEffect(card), rippleIntervalC(card));
 }
 
 /** 紫勢力渾身：eiketsudb 由弱至強（無→弱→強），畫面由左至右 強｜弱｜無。 */
@@ -1058,6 +1067,74 @@ function fullwidthNum(input: string): string {
   return input.replace(/[０-９]/g, (ch) => String(ch.charCodeAt(0) - 0xff10)).replace(/．/g, ".");
 }
 
+function stripBranchTail(value: string): string {
+  const cut = value.search(/\s*[◇◆]/);
+  if (cut < 0) return value;
+  const tail = value.slice(cut);
+  if (/追加効果|に応じて|以下に変化|[:：]\s*$/.test(tail)) return value.slice(0, cut).trim();
+  return value;
+}
+
+function isBranchFragment(value: string, items: { key: string; text: string }[]): boolean {
+  const v = value.replace(/\s+/g, "");
+  if (/[:：]\s*$/.test(value)) return true;
+  return items.some((item) => {
+    const t = item.text.replace(/\s+/g, "");
+    if (t.length >= 4 && v.includes(t.slice(0, 8))) return true;
+    if (v.length >= 4 && t.includes(v.slice(0, 8))) return true;
+    return false;
+  });
+}
+
+const BRANCH_TRIGGER = /以下の効果|効果が変わる|以下に変化/;
+const BRANCH_SKIP = /^(?:短計|[0-9０-９]+消費)/;
+
+function parseBranchLine(line: string): { key: string; text: string } | null {
+  const m = line.match(/^(.{1,24}?)[：:](.+)$/);
+  if (!m) return null;
+  const key = m[1].trim();
+  const text = m[2].trim();
+  if (!key || !text || BRANCH_SKIP.test(key) || /[。]/.test(key)) return null;
+  return { key, text };
+}
+
+function parseSpecialBranches(desc: string): { main: string; items: { key: string; text: string }[] } {
+  const raw = (desc ?? "").replace(/<br\s*\/?>/gi, "\n");
+  const lines = raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  for (let i = 0; i < lines.length; i++) {
+    if (!BRANCH_TRIGGER.test(lines[i])) continue;
+    const items: { key: string; text: string }[] = [];
+    let j = i + 1;
+    for (; j < lines.length; j++) {
+      const row = parseBranchLine(lines[j]);
+      if (!row) break;
+      items.push(row);
+    }
+    if (items.length >= 2) {
+      return { main: [...lines.slice(0, i + 1), ...lines.slice(j)].join("\n"), items };
+    }
+  }
+  return { main: desc ?? "", items: [] };
+}
+
+export type SpecialBlock = {
+  items: { key: string; text: string }[];
+};
+
+export function cardSpecial(card: Card): SpecialBlock | null {
+  const { items } = parseSpecialBranches(card.stratDesc ?? "");
+  if (items.length < 2) return null;
+  return {
+    items: items.map((item) => ({
+      key: translateLabel(item.key.replace(/[・･]/g, "／")),
+      text: translateDesc(item.text),
+    })),
+  };
+}
+
 function parseTankenBlocks(desc: string): { main: string; blocks: { name: string; cost: string | null; text: string }[] } {
   const raw = (desc ?? "").replace(/<br\s*\/?>/gi, "\n");
   const idx = raw.search(/短計[・･]/);
@@ -1143,9 +1220,10 @@ export function cardTanken(card: Card): Tanken[] {
 }
 
 export function displayMainStratDesc(card: Card): string {
-  const { main, blocks } = parseTankenBlocks(card.stratDesc ?? "");
-  if (!blocks.length) return translateDesc(card.stratDesc ?? "");
-  return translateDesc(main);
+  const tanken = parseTankenBlocks(card.stratDesc ?? "");
+  const special = parseSpecialBranches(tanken.main);
+  if (!tanken.blocks.length && !special.items.length) return translateDesc(card.stratDesc ?? "");
+  return translateDesc(special.main);
 }
 
 export function displayCats(card: Card): string[] {
