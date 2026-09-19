@@ -891,7 +891,7 @@ export function konshinTiers(card: Card): KonshinTier[] | null {
 }
 
 function parseMoraleMark(value: string): { abs: number } | { delta: number } | null {
-  const v = fullwidthNum(value).replace(/\s/g, "");
+  const v = fullwidthNum(value).replace(/\s/g, "").replace(/[▲▼↑↓]/g, "");
   const delta = v.match(/^([+\-＋－])(\d+(?:\.\d+)?)$/);
   if (delta) return { delta: (delta[1] === "-" || delta[1] === "－" ? -1 : 1) * Number(delta[2]) };
   const abs = v.match(/^(\d+(?:\.\d+)?)$/);
@@ -901,6 +901,194 @@ function parseMoraleMark(value: string): { abs: number } | { delta: number } | n
 
 function isShukuseiStrat(card: Card): boolean {
   return /宿星状態/.test(card.stratDesc ?? "");
+}
+
+export type UseCountTier = {
+  id: string;
+  title: string;
+  morale: number | null;
+  highlight: boolean;
+  rows: StatLine[];
+};
+
+function parseUseCountHeadings(desc: string): { n: number; onward: boolean; text: string }[] {
+  const lines = (desc ?? "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const headings: { n: number; onward: boolean; text: string }[] = [];
+  for (const line of lines) {
+    const m = line.match(/^([0-9０-９]+)回目(以降)?\s*[：:](.*)$/);
+    if (!m) continue;
+    headings.push({ n: parseFullWidthInt(m[1]), onward: Boolean(m[2]), text: m[3].trim() });
+  }
+  return headings;
+}
+
+function useCountMainDesc(desc: string): string {
+  const lines = (desc ?? "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const main: string[] = [];
+  for (const line of lines) {
+    if (/^[0-9０-９]+回目/.test(line)) break;
+    main.push(line);
+  }
+  return main.join("\n");
+}
+
+function isUseCountCard(card: Card): boolean {
+  return /使用した回数によって/.test(card.stratDesc ?? "") || parseUseCountHeadings(card.stratDesc ?? "").length >= 1;
+}
+
+function useCountTitle(n: number, onward: boolean): string {
+  return onward ? `第${n}次起` : `第${n}次`;
+}
+
+function stripUseMark(value: string): string {
+  return value.replace(/計略発動\s*[0-9０-９]+回目\s*/g, "").trim();
+}
+
+function splitByUseMarksInValue(effects: CardEffect[]): CardEffect[][] | null {
+  const groups = new Map<number, CardEffect[]>();
+  let tagged = 0;
+  for (const effect of effects) {
+    const m = effect.value.match(/計略発動\s*([0-9０-９]+)回目/);
+    if (!m) continue;
+    tagged += 1;
+    const n = parseFullWidthInt(m[1]);
+    const list = groups.get(n) ?? [];
+    list.push({ ...effect, value: stripUseMark(effect.value) || "有" });
+    groups.set(n, list);
+  }
+  if (tagged < 2) return null;
+  const keys = [...groups.keys()].sort((a, b) => a - b);
+  return keys.map((n) => groups.get(n) ?? []);
+}
+
+function splitByMoraleMarks(effects: CardEffect[], baseCost: number): { morale: number; items: CardEffect[] }[] | null {
+  const marks: { i: number; morale: number }[] = [];
+  effects.forEach((effect, i) => {
+    if (effect.label !== "必要士気") return;
+    const mark = parseMoraleMark(effect.value);
+    if (!mark) return;
+    marks.push({ i, morale: "abs" in mark ? mark.abs : baseCost + mark.delta });
+  });
+  if (!marks.length) return null;
+  const groups: { morale: number; items: CardEffect[] }[] = [
+    { morale: baseCost, items: effects.slice(0, marks[0].i) },
+  ];
+  for (let k = 0; k < marks.length; k++) {
+    const from = marks[k].i + 1;
+    const to = k + 1 < marks.length ? marks[k + 1].i : effects.length;
+    groups.push({
+      morale: marks[k].morale,
+      items: effects.slice(from, to).filter((effect) => effect.label !== "必要士気"),
+    });
+  }
+  return groups.length >= 2 ? groups : null;
+}
+
+const USE_CUES: [RegExp, string][] = [
+  [/射撃ダメージ/, "射撃ダメージ"],
+  [/貫通/, "貫通"],
+  [/攻撃回数/, "攻撃回数"],
+  [/兵力が回復|兵力回復/, "兵力回復"],
+  [/移動速度/, "速度上昇"],
+  [/射撃時の攻撃間隔|攻撃間隔/, "射撃間隔"],
+  [/射程/, "射程"],
+  [/知力による戦闘|知力戦闘/, "知力戦闘"],
+  [/斬撃/, "斬撃"],
+  [/知力/, "知力上昇"],
+  [/武力/, "武力上昇"],
+];
+
+function splitByHeadingCues(effects: CardEffect[], headings: { text: string }[]): CardEffect[][] | null {
+  if (headings.length < 1) return null;
+  const starts = [0];
+  let from = 0;
+  for (const heading of headings) {
+    let idx = -1;
+    for (const [re, needle] of USE_CUES) {
+      if (!re.test(heading.text)) continue;
+      idx = effects.findIndex(
+        (effect, i) => i > from && (effect.label.includes(needle) || effect.value.includes(needle)),
+      );
+      if (idx >= 0) break;
+    }
+    if (idx < 0) return null;
+    starts.push(idx);
+    from = idx;
+  }
+  const groups: CardEffect[][] = [];
+  for (let i = 0; i < starts.length; i++) {
+    groups.push(effects.slice(starts[i], i + 1 < starts.length ? starts[i + 1] : effects.length));
+  }
+  return groups.length >= 2 ? groups : null;
+}
+
+export function useCountTiers(card: Card): UseCountTier[] | null {
+  if (!isUseCountCard(card)) return null;
+  const headings = parseUseCountHeadings(card.stratDesc ?? "");
+  const hide = pickMainDurationEffect(card);
+  const effects = mainEffects(card);
+  const body = effects.filter((effect) => {
+    if (effect.label === "必要士気") return false;
+    if (hide && effect.label === hide.label && effect.value === hide.value) return false;
+    return !isDurationEffectLabel(effect.label) && !effect.label.startsWith("効果時間");
+  });
+
+  const expected = headings.length + 1;
+  let groups: CardEffect[][] | null = null;
+  let morales: (number | null)[] | null = null;
+
+  const byMark = splitByUseMarksInValue(body);
+  if (byMark && byMark.length >= 2) {
+    groups = byMark;
+  }
+
+  if (!groups) {
+    const byMorale = splitByMoraleMarks(effects, card.stratCost);
+    if (byMorale && byMorale.length >= 2) {
+      groups = byMorale.map((g) => g.items.filter((e) => e.label !== "必要士気"));
+      morales = byMorale.map((g) => g.morale);
+    }
+  }
+
+  if (!groups) {
+    const items = body.filter((e) => e.label !== "必要士気");
+    const splitLabel = pickKokouSplitLabel(items, expected || null);
+    if (splitLabel) {
+      const repeating = splitRepeatingGroups(items, splitLabel);
+      if (repeating.length >= 2 && (!expected || Math.abs(repeating.length - expected) <= 1)) {
+        groups = repeating;
+      }
+    }
+  }
+
+  if (!groups) groups = splitByHeadingCues(body.filter((e) => e.label !== "必要士気"), headings);
+
+  if (!groups || groups.length < 2) return null;
+
+  const lastOnward = headings[headings.length - 1]?.onward ?? groups.length > (headings[headings.length - 1]?.n ?? 0);
+  return groups.map((group, i) => {
+    const heading = headings.find((h) => h.n === i + 1);
+    const onward = heading?.onward ?? (i === groups!.length - 1 && lastOnward && i > 0);
+    const n = heading?.n ?? i + 1;
+    return {
+      id: `use-${n}`,
+      title: useCountTitle(n, onward),
+      morale: morales?.[i] ?? (morales ? null : card.stratCost),
+      highlight: i === groups!.length - 1,
+      rows: effectRows(
+        group.map((effect) => ({ ...effect, value: stripUseMark(effect.value) || effect.value || "有" })),
+        hide,
+      ),
+    };
+  });
 }
 
 export function shukuseiTiers(card: Card): ShukuseiTier[] | null {
@@ -1201,6 +1389,7 @@ export function cardSpecial(card: Card): SpecialBlock | null {
       })),
     };
   }
+  if (isUseCountCard(card)) return null;
   const { specials } = peelSpecials(card);
   if (!specials.length) return null;
   const hide = pickMainDurationEffect(card);
@@ -1299,8 +1488,11 @@ export function cardTanken(card: Card): Tanken[] {
 export function displayMainStratDesc(card: Card): string {
   const tanken = parseTankenBlocks(card.stratDesc ?? "");
   const special = parseSpecialBranches(tanken.main);
-  if (!tanken.blocks.length && !special.items.length) return translateDesc(card.stratDesc ?? "");
-  return translateDesc(special.main);
+  const source = isUseCountCard(card) ? useCountMainDesc(special.main) : special.main;
+  if (!tanken.blocks.length && !special.items.length && source === (card.stratDesc ?? "")) {
+    return translateDesc(card.stratDesc ?? "");
+  }
+  return translateDesc(source);
 }
 
 export function displayCats(card: Card): string[] {

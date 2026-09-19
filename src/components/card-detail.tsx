@@ -12,6 +12,7 @@ import {
   officialUrl,
   shukuseiTiers,
   splitEffectValue,
+  useCountTiers,
   type Card,
   type KokouTiers,
   type KonshinTier,
@@ -19,6 +20,7 @@ import {
   type SpecialBlock,
   type StatLine,
   type Tanken,
+  type UseCountTier,
 } from "@/data/catalog";
 import { Button } from "@/components/ui/button";
 import { CardIdentity } from "@/components/card-identity";
@@ -51,13 +53,14 @@ export function CardDetail({ card }: { card: Card }) {
   const konshin = konshinTiers(card);
   const kokou = konshin ? null : kokouTiers(card);
   const shukusei = konshin || kokou ? null : shukuseiTiers(card);
-  const effects = konshin || kokou || shukusei ? [] : displayEffects(card);
+  const useCount = konshin || kokou || shukusei ? null : useCountTiers(card);
+  const effects = konshin || kokou || shukusei || useCount ? [] : displayEffects(card);
   const area = displayArea(card);
   const desc = displayMainStratDesc(card);
   const tankens = cardTanken(card);
   const special = cardSpecial(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
-  const hasData = Boolean(konshin || kokou || shukusei || effects.length || area || duration.label);
+  const hasData = Boolean(konshin || kokou || shukusei || useCount || effects.length || area || duration.label);
 
   return (
     <div className="flex flex-col gap-3 pb-8">
@@ -91,6 +94,8 @@ export function CardDetail({ card }: { card: Card }) {
             <KokouGrid data={kokou} />
           ) : shukusei ? (
             <ShukuseiGrid tiers={shukusei} />
+          ) : useCount ? (
+            <UseCountGrid tiers={useCount} />
           ) : effects.length ? (
             <EffectList rows={effects} />
           ) : null}
@@ -238,6 +243,38 @@ function KonshinGrid({ tiers }: { tiers: KonshinTier[] }) {
                 {tier.title}
               </h3>
               <p className="text-xs tabular-nums text-faint">{tier.morale}</p>
+            </div>
+            <TierRows id={tier.id} rows={tier.rows} />
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function UseCountGrid({ tiers }: { tiers: UseCountTier[] }) {
+  const moraleVaries = new Set(tiers.map((tier) => tier.morale).filter((m) => m != null)).size > 1;
+  return (
+    <div className="mt-4">
+      <p className="text-xs leading-relaxed text-pretty text-muted">
+        {moraleVaries ? "使用次數愈多，效果愈強，所需士氣亦會上升。" : "使用次數愈多，效果愈強。"}
+      </p>
+      <div className="mt-2 flex flex-col gap-2">
+        {tiers.map((tier) => (
+          <section
+            key={tier.id}
+            className={cn("rounded-md px-2.5 py-2", tier.highlight ? "bg-faction-ao/25" : "bg-surface-2")}
+          >
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className={cn("font-display text-sm leading-tight", tier.highlight ? "text-fg" : "text-muted")}>
+                {tier.title}
+              </h3>
+              {tier.morale != null ? (
+                <span className="inline-flex shrink-0 items-baseline gap-1.5 whitespace-nowrap">
+                  <span className="text-xs text-faint">消耗士氣</span>
+                  <span className="font-display text-xl tabular-nums leading-none text-fg">{tier.morale}</span>
+                </span>
+              ) : null}
             </div>
             <TierRows id={tier.id} rows={tier.rows} />
           </section>
