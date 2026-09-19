@@ -671,11 +671,24 @@ function durationRank(effect: CardEffect, card: Card): number {
   return -1;
 }
 
+function isRecastCard(card: Card): boolean {
+  return /再度計略を発動/.test(card.stratDesc ?? "");
+}
+
+function recastMarkerIndex(card: Card): number {
+  return mainEffects(card).findIndex((effect) => effect.label === "消費士気" || effect.label === "必要士気");
+}
+
 function pickMainDurationEffect(card: Card): CardEffect | null {
+  let pool = mainEffects(card);
+  if (isRecastCard(card)) {
+    const idx = recastMarkerIndex(card);
+    if (idx > 0) pool = pool.slice(0, idx);
+  }
   let best: CardEffect | null = null;
   let bestRank = -1;
   let bestC = -1;
-  for (const effect of mainEffects(card)) {
+  for (const effect of pool) {
     if (!effect.label.startsWith("効果時間")) continue;
     const rank = durationRank(effect, card);
     const c = parseDurationValue(effect.value)?.durC ?? -1;
@@ -1301,6 +1314,57 @@ export function schoolTiers(card: Card): SchoolCol[] | null {
     note: i < branched.items.length ? translateDesc(branched.items[i].text) : "無追加效果",
     rows: effectRows(group, keepDur),
   }));
+}
+
+export type RecastCol = {
+  id: "first" | "again";
+  title: string;
+  note: string;
+  highlight: boolean;
+  rows: StatLine[];
+};
+
+function stripRecastMark(value: string): string {
+  const text = value
+    .replace(/計略効果外に使用したとき\s*/g, "")
+    .replace(/計略効果中に再使用したとき\s*/g, "")
+    .trim();
+  if (text) return text;
+  if (/計略効果外に使用したとき|計略効果中に再使用したとき/.test(value)) return "有";
+  return value;
+}
+
+export function recastTiers(card: Card): RecastCol[] | null {
+  if (!isRecastCard(card)) return null;
+  const idx = recastMarkerIndex(card);
+  if (idx < 1) return null;
+  const effects = mainEffects(card).map((effect) => {
+    const value = stripRecastMark(effect.value);
+    if (effect.label === "消費士気" || effect.label === "必要士気") {
+      return { label: "再発動士気", value };
+    }
+    return { ...effect, value };
+  });
+  const first = effects.slice(0, idx);
+  const again = effects.slice(idx);
+  if (!first.length || !again.length) return null;
+  const keepDur: CardEffect = { label: "__dur__", value: "__dur__" };
+  return [
+    {
+      id: "first",
+      title: "初次發動",
+      note: "",
+      highlight: false,
+      rows: effectRows(first, keepDur),
+    },
+    {
+      id: "again",
+      title: "效果中再發動",
+      note: "條件與效果有別於初次",
+      highlight: true,
+      rows: effectRows(again, keepDur),
+    },
+  ];
 }
 
 export function shukuseiTiers(card: Card): ShukuseiTier[] | null {

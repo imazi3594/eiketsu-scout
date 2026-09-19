@@ -10,6 +10,7 @@ import {
   kokouTiers,
   konshinTiers,
   officialUrl,
+  recastTiers,
   schoolTiers,
   senkiTiers,
   shukuseiTiers,
@@ -18,6 +19,7 @@ import {
   type Card,
   type KokouTiers,
   type KonshinTier,
+  type RecastCol,
   type SenkiCol,
   type SchoolCol,
   type ShukuseiTier,
@@ -60,13 +62,14 @@ export function CardDetail({ card }: { card: Card }) {
   const useCount = konshin || kokou || shukusei ? null : useCountTiers(card);
   const senki = konshin || kokou || shukusei || useCount ? null : senkiTiers(card);
   const school = konshin || kokou || shukusei || useCount || senki ? null : schoolTiers(card);
-  const effects = konshin || kokou || shukusei || useCount || senki || school ? [] : displayEffects(card);
+  const recast = konshin || kokou || shukusei || useCount || senki || school ? null : recastTiers(card);
+  const effects = konshin || kokou || shukusei || useCount || senki || school || recast ? [] : displayEffects(card);
   const area = displayArea(card);
   const desc = displayMainStratDesc(card);
   const tankens = cardTanken(card);
-  const special = school ? null : cardSpecial(card);
+  const special = school || recast ? null : cardSpecial(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
-  const hasData = Boolean(konshin || kokou || shukusei || useCount || senki || school || effects.length || area || duration.label);
+  const hasData = Boolean(konshin || kokou || shukusei || useCount || senki || school || recast || effects.length || area || duration.label);
 
   return (
     <div className="flex flex-col gap-3 pb-8">
@@ -106,6 +109,8 @@ export function CardDetail({ card }: { card: Card }) {
             <SenkiGrid cols={senki} />
           ) : school ? (
             <SchoolGrid cols={school} />
+          ) : recast ? (
+            <RecastGrid cols={recast} />
           ) : effects.length ? (
             <EffectList rows={effects} />
           ) : null}
@@ -287,6 +292,28 @@ function UseCountGrid({ tiers }: { tiers: UseCountTier[] }) {
               ) : null}
             </div>
             <TierRows id={tier.id} rows={tier.rows} />
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RecastGrid({ cols }: { cols: RecastCol[] }) {
+  return (
+    <div className="mt-4">
+      <p className="text-xs leading-relaxed text-pretty text-muted">計略效果中可再發動一次，條件與效果有別於初次。</p>
+      <div className="mt-2 flex flex-col gap-2">
+        {cols.map((col) => (
+          <section
+            key={col.id}
+            className={cn("rounded-md px-2.5 py-2", col.highlight ? "bg-faction-gen/25" : "bg-surface-2")}
+          >
+            <h3 className={cn("font-display text-sm leading-tight", col.highlight ? "text-fg" : "text-muted")}>
+              {col.title}
+            </h3>
+            {col.note ? <p className="mt-0.5 text-xs leading-relaxed text-pretty text-muted">{col.note}</p> : null}
+            <TierRows id={col.id} rows={col.rows} />
           </section>
         ))}
       </div>
