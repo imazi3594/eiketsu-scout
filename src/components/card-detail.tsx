@@ -258,17 +258,17 @@ function KokouSwords({ n }: { n: number }) {
   );
 }
 
-/** 🗡️-shaped pip, 琥色偏亮。 */
+/** 🗡️-shaped pip：長劍身、琥色偏亮。 */
 function KokouSwordMark() {
   return (
     <svg viewBox="0 0 32 32" className="size-5 shrink-0 drop-shadow-[0_0_3px_#ffb340]" aria-hidden>
-      <g transform="rotate(48 16 16)">
-        <path d="M16 1.6 19.4 16.2H12.6Z" fill="#ffc45c" />
-        <path d="M16 3.1 16.9 16H15.1Z" fill="#fff6d4" />
-        <rect x="8.6" y="15.6" width="14.8" height="2.8" rx="1.1" fill="#ffb340" />
-        <rect x="13.7" y="18.2" width="4.6" height="7.4" rx="1.15" fill="#f08c18" />
-        <circle cx="16" cy="26.6" r="2.55" fill="#ffc45c" />
-        <circle cx="16" cy="26.6" r="1.15" fill="#fff3c4" />
+      <g transform="rotate(45 16 16)">
+        <path d="M16 .4 18.15 7.8 18.45 20.6H13.55L13.85 7.8Z" fill="#ffc45c" />
+        <path d="M16 1.6 16.7 20.6h-1.4Z" fill="#fff6d4" />
+        <rect x="9.4" y="20.15" width="13.2" height="2.05" rx=".85" fill="#ffb340" />
+        <rect x="14.2" y="22" width="3.6" height="5.6" rx=".95" fill="#f08c18" />
+        <circle cx="16" cy="28.6" r="2.25" fill="#ffc45c" />
+        <circle cx="16" cy="28.6" r="1" fill="#fff3c4" />
       </g>
     </svg>
   );
