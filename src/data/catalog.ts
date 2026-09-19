@@ -743,15 +743,12 @@ export function formatStratDuration(card: Card): StratDuration {
 }
 
 export function displayEffects(card: Card): StatLine[] {
+  const { rest } = peelSpecials(card);
   const { items } = parseSpecialBranches(card.stratDesc ?? "");
-  const effects = mainEffects(card).map((effect) => ({
-    ...effect,
-    value: stripBranchTail(effect.value),
-  }));
   const filtered =
     items.length >= 2
-      ? effects.filter((effect) => effect.label !== "特殊効果" || !isBranchFragment(effect.value, items))
-      : effects;
+      ? rest.filter((effect) => effect.label !== "特殊効果" || !isBranchFragment(effect.value, items))
+      : rest;
   return effectRows(filtered, pickMainDurationEffect(card), rippleIntervalC(card));
 }
 
@@ -1086,6 +1083,41 @@ function isBranchFragment(value: string, items: { key: string; text: string }[])
   });
 }
 
+const SPECIAL_NEST =
+  /^(武力上昇|武力低下|速度上昇|速度低下|知力上昇|知力低下|兵力減少|ダメージ|固定ダメージ)/;
+
+function peelSpecials(card: Card): { rest: CardEffect[]; specials: { text: string; nested: CardEffect[] }[] } {
+  const hide = pickMainDurationEffect(card);
+  const effects = mainEffects(card).map((effect) => ({
+    ...effect,
+    value: stripBranchTail(effect.value),
+  }));
+  const rest: CardEffect[] = [];
+  const specials: { text: string; nested: CardEffect[] }[] = [];
+  let i = 0;
+  while (i < effects.length) {
+    const cur = effects[i];
+    if (cur.label !== "特殊効果") {
+      rest.push(cur);
+      i += 1;
+      continue;
+    }
+    const nested: CardEffect[] = [];
+    i += 1;
+    while (i < effects.length && effects[i].label !== "特殊効果") {
+      const next = effects[i];
+      if (hide && next.label === hide.label && next.value === hide.value) break;
+      const nestable =
+        next.label.startsWith("効果時間") || SPECIAL_NEST.test(next.label);
+      if (!nestable) break;
+      nested.push(next);
+      i += 1;
+    }
+    specials.push({ text: cur.value, nested });
+  }
+  return { rest, specials };
+}
+
 const BRANCH_TRIGGER = /以下の効果|効果が変わる|以下に変化/;
 const BRANCH_SKIP = /^(?:短計|[0-9０-９]+消費)/;
 
@@ -1120,17 +1152,33 @@ function parseSpecialBranches(desc: string): { main: string; items: { key: strin
   return { main: desc ?? "", items: [] };
 }
 
+export type SpecialItem = {
+  key?: string;
+  text: string;
+  rows?: StatLine[];
+};
+
 export type SpecialBlock = {
-  items: { key: string; text: string }[];
+  items: SpecialItem[];
 };
 
 export function cardSpecial(card: Card): SpecialBlock | null {
-  const { items } = parseSpecialBranches(card.stratDesc ?? "");
-  if (items.length < 2) return null;
+  const branched = parseSpecialBranches(card.stratDesc ?? "");
+  if (branched.items.length >= 2) {
+    return {
+      items: branched.items.map((item) => ({
+        key: translateLabel(item.key.replace(/[・･]/g, "／")),
+        text: translateDesc(item.text),
+      })),
+    };
+  }
+  const { specials } = peelSpecials(card);
+  if (!specials.length) return null;
+  const hide = pickMainDurationEffect(card);
   return {
-    items: items.map((item) => ({
-      key: translateLabel(item.key.replace(/[・･]/g, "／")),
+    items: specials.map((item) => ({
       text: translateDesc(item.text),
+      rows: item.nested.length ? effectRows(item.nested, hide) : undefined,
     })),
   };
 }

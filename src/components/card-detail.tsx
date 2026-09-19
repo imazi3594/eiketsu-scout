@@ -150,12 +150,25 @@ function SpecialBox({ block }: { block: SpecialBlock }) {
       <p className="text-xs text-faint">特殊效果</p>
       <ul className="mt-3 space-y-1.5">
         {block.items.map((item) => (
-          <li key={`${item.key}-${item.text}`} className="flex gap-2 rounded-md bg-surface-2 px-2.5 py-1.5">
-            <span className="text-faint">·</span>
-            <span className="min-w-0">
-              <span className="text-xs text-muted">{item.key}</span>
-              <span className="text-sm leading-relaxed text-pretty text-fg">　{item.text}</span>
-            </span>
+          <li key={`${item.key ?? ""}-${item.text}`} className="rounded-md bg-surface-2 px-2.5 py-1.5">
+            <p className="flex gap-2">
+              <span className="text-faint">·</span>
+              <span className="min-w-0 text-sm leading-relaxed text-pretty text-fg">
+                {item.key ? (
+                  <>
+                    <span className="text-xs text-muted">{item.key}</span>
+                    <span>　{item.text}</span>
+                  </>
+                ) : (
+                  item.text
+                )}
+              </span>
+            </p>
+            {item.rows?.length ? (
+              <div className="pl-4">
+                <EffectList rows={item.rows} compact />
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>
@@ -163,9 +176,9 @@ function SpecialBox({ block }: { block: SpecialBlock }) {
   );
 }
 
-function EffectList({ rows }: { rows: StatLine[] }) {
+function EffectList({ rows, compact }: { rows: StatLine[]; compact?: boolean }) {
   return (
-    <dl className="mt-4 grid grid-cols-1 gap-1.5">
+    <dl className={cn(compact ? "mt-1.5" : "mt-4", "grid grid-cols-1 gap-1.5")}>
       {rows.map((row) => (
         <EffectRow key={`${row.label}-${row.value}`} row={row} />
       ))}
