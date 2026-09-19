@@ -68,11 +68,12 @@ export function AboutPage() {
         <div className="mt-4 flex items-center gap-2">
           <h2 className="font-display text-2xl tracking-tight">英傑大戦⚡️速查</h2>
         </div>
-        <p className="mt-2 text-sm text-muted">對戰用口袋手冊　·　{CARD_COUNT} 張</p>
+        <p className="mt-2 text-sm text-muted">對戰用口袋手冊</p>
+        <p className="mt-1 text-sm tabular-nums text-muted">收錄卡牌 {CARD_COUNT} 張</p>
       </div>
 
       <p className="mt-6 text-sm leading-relaxed text-pretty text-fg">
-        對戰時輸入名稱、卡號或計略，即可查看時長（C）、武力／回血、渾身三欄、琥煌 0–6 劍。專為單手速查而設。
+        輸入卡牌武將的名稱、卡號或計略的其中字詞，或使用篩選功能，就能極速查詢卡牌資料，而且是繁體中文翻譯版本，專為對戰準備時速查而設！！！
       </p>
 
       <section className="mt-6 rounded-lg border border-white/10 bg-black/35 p-4">
