@@ -1110,6 +1110,109 @@ export function useCountTiers(card: Card): UseCountTier[] | null {
   });
 }
 
+export type SenkiCol = {
+  id: "before" | "after";
+  title: string;
+  highlight: boolean;
+  rows: StatLine[];
+};
+
+function isSenkiCard(card: Card): boolean {
+  return /戦器を解放していなければ/.test(card.stratDesc ?? "");
+}
+
+function parseSenkiClauses(desc: string): { main: string; before: string; after: string } | null {
+  const m = (desc ?? "").replace(/<br\s*\/?>/gi, "\n").match(
+    /自軍が戦器を解放していなければ(.+?)(?:、|。)\s*戦器を解放していれば(.+)/s,
+  );
+  if (!m) return null;
+  const cut = desc.search(/さらに自軍が戦器を解放していなければ|自軍が戦器を解放していなければ/);
+  const main = (cut >= 0 ? desc.slice(0, cut) : "").replace(/さらに\s*$/, "").replace(/<br\s*\/?>/gi, "\n").trim();
+  return { main, before: m[1].trim(), after: m[2].trim() };
+}
+
+const SENKI_CUES: [RegExp, string][] = [
+  [/槍撃ダメージ/, "槍撃ダメージ"],
+  [/斬撃ダメージ/, "斬撃ダメージ"],
+  [/乱戦中の攻撃速度/, "乱戦攻撃速度"],
+  [/武力によるダメージを軽減/, "武力ダメージ軽減"],
+  [/兵力が回復/, "兵力回復"],
+  [/士気が上が/, "士気増加"],
+  [/移動速度が上が/, "速度上昇"],
+  [/移動速度が下が|移動速度を下げ/, "速度低下"],
+  [/武力を徐々に下げ/, "武力低下(追加)"],
+  [/武力が上が/, "武力上昇"],
+  [/武力を下げ|武力が下が/, "武力低下"],
+];
+
+function senkiClauseLabels(text: string): string[] {
+  const labels: string[] = [];
+  let rest = text;
+  if (/武力と移動速度と斬撃ダメージ/.test(rest)) {
+    labels.push("武力上昇", "速度上昇", "斬撃ダメージ");
+    rest = rest.replace(/武力と移動速度と斬撃ダメージ/, " ");
+  } else if (/武力と移動速度/.test(rest)) {
+    labels.push("武力上昇", "速度上昇");
+    rest = rest.replace(/武力と移動速度/, " ");
+  }
+  for (const [re, label] of SENKI_CUES) {
+    if (!re.test(rest)) continue;
+    labels.push(label);
+    rest = rest.replace(re, " ");
+  }
+  return labels;
+}
+
+function senkiMatch(effect: CardEffect, want: string): boolean {
+  return effect.label === want || effect.label.startsWith(want);
+}
+
+function takeSenkiLabels(effects: CardEffect[], wants: string[]): { taken: CardEffect[]; rest: CardEffect[] } {
+  const taken: CardEffect[] = [];
+  const used = new Set<number>();
+  for (const want of wants) {
+    const i = effects.findIndex((effect, idx) => !used.has(idx) && senkiMatch(effect, want));
+    if (i < 0) continue;
+    taken.push(effects[i]);
+    used.add(i);
+  }
+  return { taken, rest: effects.filter((_, i) => !used.has(i)) };
+}
+
+export function senkiTiers(card: Card): SenkiCol[] | null {
+  if (!isSenkiCard(card)) return null;
+  const clauses = parseSenkiClauses(card.stratDesc ?? "");
+  if (!clauses) return null;
+  const hide = pickMainDurationEffect(card);
+  const body = mainEffects(card).filter((effect) => {
+    if (hide && effect.label === hide.label && effect.value === hide.value) return false;
+    return !isDurationEffectLabel(effect.label) && !effect.label.startsWith("効果時間");
+  });
+  if (body.length < 2) return null;
+
+  const powerHits = body.filter((effect) => effect.label === "武力上昇" || effect.label.startsWith("武力上昇"));
+  let beforeFx: CardEffect[];
+  let afterFx: CardEffect[];
+  if (powerHits.length >= 2) {
+    const groups = splitRepeatingGroups(body, powerHits[0].label);
+    if (groups.length < 2) return null;
+    beforeFx = groups[0];
+    afterFx = groups.slice(1).flat();
+  } else {
+    const shared = takeSenkiLabels(body, senkiClauseLabels(clauses.main));
+    const before = takeSenkiLabels(shared.rest, senkiClauseLabels(clauses.before));
+    const after = takeSenkiLabels(before.rest, senkiClauseLabels(clauses.after));
+    beforeFx = [...shared.taken, ...before.taken];
+    afterFx = [...shared.taken, ...after.taken, ...after.rest];
+  }
+
+  if (!beforeFx.length && !afterFx.length) return null;
+  return [
+    { id: "before", title: "戰器未解放", highlight: false, rows: effectRows(beforeFx, hide) },
+    { id: "after", title: "戰器已解放", highlight: true, rows: effectRows(afterFx, hide) },
+  ];
+}
+
 export function shukuseiTiers(card: Card): ShukuseiTier[] | null {
   if (!isShukuseiStrat(card)) return null;
   const effects = card.effects ?? [];

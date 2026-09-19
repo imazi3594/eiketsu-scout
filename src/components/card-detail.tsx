@@ -10,12 +10,14 @@ import {
   kokouTiers,
   konshinTiers,
   officialUrl,
+  senkiTiers,
   shukuseiTiers,
   splitEffectValue,
   useCountTiers,
   type Card,
   type KokouTiers,
   type KonshinTier,
+  type SenkiCol,
   type ShukuseiTier,
   type SpecialBlock,
   type StatLine,
@@ -54,13 +56,14 @@ export function CardDetail({ card }: { card: Card }) {
   const kokou = konshin ? null : kokouTiers(card);
   const shukusei = konshin || kokou ? null : shukuseiTiers(card);
   const useCount = konshin || kokou || shukusei ? null : useCountTiers(card);
-  const effects = konshin || kokou || shukusei || useCount ? [] : displayEffects(card);
+  const senki = konshin || kokou || shukusei || useCount ? null : senkiTiers(card);
+  const effects = konshin || kokou || shukusei || useCount || senki ? [] : displayEffects(card);
   const area = displayArea(card);
   const desc = displayMainStratDesc(card);
   const tankens = cardTanken(card);
   const special = cardSpecial(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
-  const hasData = Boolean(konshin || kokou || shukusei || useCount || effects.length || area || duration.label);
+  const hasData = Boolean(konshin || kokou || shukusei || useCount || senki || effects.length || area || duration.label);
 
   return (
     <div className="flex flex-col gap-3 pb-8">
@@ -96,6 +99,8 @@ export function CardDetail({ card }: { card: Card }) {
             <ShukuseiGrid tiers={shukusei} />
           ) : useCount ? (
             <UseCountGrid tiers={useCount} />
+          ) : senki ? (
+            <SenkiGrid cols={senki} />
           ) : effects.length ? (
             <EffectList rows={effects} />
           ) : null}
@@ -277,6 +282,27 @@ function UseCountGrid({ tiers }: { tiers: UseCountTier[] }) {
               ) : null}
             </div>
             <TierRows id={tier.id} rows={tier.rows} />
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SenkiGrid({ cols }: { cols: SenkiCol[] }) {
+  return (
+    <div className="mt-4">
+      <p className="text-xs leading-relaxed text-pretty text-muted">自軍尚未解放戰器時，與已解放時效果不同。</p>
+      <div className="mt-2 flex flex-col gap-2">
+        {cols.map((col) => (
+          <section
+            key={col.id}
+            className={cn("rounded-md px-2.5 py-2", col.highlight ? "bg-faction-gen/25" : "bg-surface-2")}
+          >
+            <h3 className={cn("font-display text-sm leading-tight", col.highlight ? "text-fg" : "text-muted")}>
+              {col.title}
+            </h3>
+            <TierRows id={col.id} rows={col.rows} />
           </section>
         ))}
       </div>
