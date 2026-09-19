@@ -300,9 +300,12 @@ function UseCountGrid({ tiers }: { tiers: UseCountTier[] }) {
 }
 
 function RecastGrid({ cols }: { cols: RecastCol[] }) {
+  const retreat = cols.some((col) => col.title === "撤退中發動");
   return (
     <div className="mt-4">
-      <p className="text-xs leading-relaxed text-pretty text-muted">計略效果中可再發動一次，條件與效果有別於初次。</p>
+      <p className="text-xs leading-relaxed text-pretty text-muted">
+        {retreat ? "撤退中亦可發動，效果有別於在場時。" : "計略效果中可再發動一次，條件與效果有別於初次。"}
+      </p>
       <div className="mt-2 flex flex-col gap-2">
         {cols.map((col) => (
           <section

@@ -675,13 +675,25 @@ function isRecastCard(card: Card): boolean {
   return /再度計略を発動/.test(card.stratDesc ?? "");
 }
 
+function isRetreatCastCard(card: Card): boolean {
+  return /撤退中に計略を発動すると/.test(card.stratDesc ?? "");
+}
+
 function recastMarkerIndex(card: Card): number {
-  return mainEffects(card).findIndex((effect) => effect.label === "消費士気" || effect.label === "必要士気");
+  const effects = mainEffects(card);
+  if (isRecastCard(card)) {
+    return effects.findIndex((effect) => effect.label === "消費士気" || effect.label === "必要士気");
+  }
+  if (isRetreatCastCard(card)) {
+    const i = effects.findIndex((effect) => effect.label.startsWith("効果時間"));
+    return i >= 0 ? i + 1 : -1;
+  }
+  return -1;
 }
 
 function pickMainDurationEffect(card: Card): CardEffect | null {
   let pool = mainEffects(card);
-  if (isRecastCard(card)) {
+  if (isRecastCard(card) || isRetreatCastCard(card)) {
     const idx = recastMarkerIndex(card);
     if (idx > 0) pool = pool.slice(0, idx);
   }
@@ -1335,7 +1347,9 @@ function stripRecastMark(value: string): string {
 }
 
 export function recastTiers(card: Card): RecastCol[] | null {
-  if (!isRecastCard(card)) return null;
+  const recast = isRecastCard(card);
+  const retreat = isRetreatCastCard(card);
+  if (!recast && !retreat) return null;
   const idx = recastMarkerIndex(card);
   if (idx < 1) return null;
   const effects = mainEffects(card).map((effect) => {
@@ -1349,6 +1363,24 @@ export function recastTiers(card: Card): RecastCol[] | null {
   const again = effects.slice(idx);
   if (!first.length || !again.length) return null;
   const keepDur: CardEffect = { label: "__dur__", value: "__dur__" };
+  if (retreat) {
+    return [
+      {
+        id: "first",
+        title: "在場發動",
+        note: "發動後自身會撤退",
+        highlight: false,
+        rows: effectRows(first, keepDur),
+      },
+      {
+        id: "again",
+        title: "撤退中發動",
+        note: "改為在撤退處復活，效果不同",
+        highlight: true,
+        rows: effectRows(again, keepDur),
+      },
+    ];
+  }
   return [
     {
       id: "first",
