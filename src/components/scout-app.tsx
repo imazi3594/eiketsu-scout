@@ -560,6 +560,7 @@ function CardHitRow({
           <span className="text-fg">{card.stratName}</span>
           <span className="text-muted">　士氣{card.stratCost}</span>
           <span className="tabular-nums text-muted">　{dur.compact}</span>
+          {dur.cap ? <span className="text-[10px] text-faint">上限</span> : null}
         </p>
       </div>
     </button>

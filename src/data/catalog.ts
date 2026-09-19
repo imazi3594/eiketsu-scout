@@ -106,6 +106,7 @@ export type StratDuration = {
   dep: string;
   extra: string;
   hint: string;
+  cap: boolean;
 };
 
 export const COLORS: ColorName[] = ["蒼", "緋", "碧", "玄", "紫", "琥", "黄"];
@@ -689,7 +690,7 @@ export function formatStratDuration(card: Card): StratDuration {
   const picked = pickMainDuration(card);
   const q = durQualifier(picked.note);
   const kyotenCap = picked.cap && isKyotenCard(card);
-  const suffix = kyotenCap ? [q, "上限"].filter(Boolean).join("") : q;
+  const suffix = q;
   const hint = kyotenCap
     ? "時長為據點上限。對手破壞據點會提早結束。波紋時長是據點放出的效果，不是計略時長。"
     : stratTimeNote(card.stratTime);
@@ -714,23 +715,24 @@ export function formatStratDuration(card: Card): StratDuration {
       dep,
       extra: extraBits.join("　"),
       hint,
+      cap: kyotenCap,
     };
   }
 
   if (card.stratTime === "一瞬") {
-    return { compact: "一瞬", label: "一瞬", seconds: "0C", dep: "", extra: "", hint };
+    return { compact: "一瞬", label: "一瞬", seconds: "0C", dep: "", extra: "", hint, cap: kyotenCap };
   }
   if (card.stratTime === "撤退するまで") {
-    return { compact: "至撤退", label: "直至撤退", seconds: "", dep: "", extra: "", hint };
+    return { compact: "至撤退", label: "直至撤退", seconds: "", dep: "", extra: "", hint, cap: kyotenCap };
   }
   if (card.durNote) {
     const note = translateValue(card.durNote);
-    return { compact: note, label: note, seconds: "", dep: "", extra: "", hint };
+    return { compact: note, label: note, seconds: "", dep: "", extra: "", hint, cap: kyotenCap };
   }
   if (card.stratTime === "知力時間") {
-    return { compact: "知力時", label: "知力時間", seconds: "", dep: "", extra: "資料庫未列具體 C 數。", hint };
+    return { compact: "知力時", label: "知力時間", seconds: "", dep: "", extra: "資料庫未列具體 C 數。", hint, cap: kyotenCap };
   }
-  return { compact: translateValue(card.stratTime), label: translateValue(card.stratTime), seconds: "", dep: "", extra: "", hint };
+  return { compact: translateValue(card.stratTime), label: translateValue(card.stratTime), seconds: "", dep: "", extra: "", hint, cap: kyotenCap };
 }
 
 export function displayEffects(card: Card): StatLine[] {
