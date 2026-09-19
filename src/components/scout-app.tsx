@@ -506,7 +506,7 @@ export function ScoutApp() {
               if (cur?.v === "card") history.back();
               else select(null);
             }}
-            className="absolute right-2 top-[max(0.35rem,env(safe-area-inset-top))] z-20 rounded-md p-2 text-muted hover:bg-surface-2 hover:text-fg"
+            className="absolute right-2 top-[max(0.35rem,env(safe-area-inset-top))] z-20 grid size-10 place-items-center rounded-full bg-black/70 text-fg shadow-[0_0_0_1px_rgba(255,255,255,0.12)] backdrop-blur-sm hover:bg-black/85"
             aria-label="關閉"
           >
             <X className="size-5" />
