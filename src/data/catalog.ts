@@ -630,6 +630,23 @@ function durQualifier(note: string): string {
   return "";
 }
 
+function conditionDuration(note: string): { compact: string; label: string; extra: string } | null {
+  const n = note ?? "";
+  if (/城に戻るか/.test(n)) {
+    return { compact: "至回城", label: "至回城", extra: translateValue(n) };
+  }
+  if (/味方への効果が終了/.test(n)) {
+    return { compact: "跟隨", label: "跟隨", extra: translateValue(n) };
+  }
+  if (/もとの武力|元の武力/.test(n)) {
+    return { compact: "至武力回落", label: "至武力回落", extra: translateValue(n) };
+  }
+  if (n.length > 10 && !/\d+\s*C/.test(n) && /まで/.test(n)) {
+    return { compact: "條件", label: "條件", extra: translateValue(n) };
+  }
+  return null;
+}
+
 function parseDurationValue(value: string): { durC: number; depC: number | null } | null {
   const match = value.match(/(\d+(?:\.\d+)?)\s*C/);
   if (!match) return null;
@@ -733,6 +750,18 @@ export function formatStratDuration(card: Card): StratDuration {
     return { compact: "至撤退", label: "直至撤退", seconds: "", dep: "", extra: "", hint, cap: kyotenCap };
   }
   if (card.durNote) {
+    const cond = conditionDuration(card.durNote);
+    if (cond) {
+      return {
+        compact: cond.compact,
+        label: cond.label,
+        seconds: "",
+        dep: "",
+        extra: cond.extra,
+        hint,
+        cap: kyotenCap,
+      };
+    }
     const note = translateValue(card.durNote);
     return { compact: note, label: note, seconds: "", dep: "", extra: "", hint, cap: kyotenCap };
   }

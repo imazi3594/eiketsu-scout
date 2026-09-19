@@ -71,11 +71,11 @@ export function CardDetail({ card }: { card: Card }) {
       {hasData ? (
         <section className="rounded-lg border border-white/10 bg-black/35 p-4">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-xs text-faint">時長</p>
-            <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display text-3xl tabular-nums leading-none text-fg">
+            <p className="shrink-0 text-xs text-faint">時長</p>
+            <p className="min-w-0 text-right font-display text-3xl tabular-nums leading-tight text-fg">
               {duration.label}
               {duration.cap ? (
-                <span className="text-xs font-sans font-normal tracking-wide text-faint">上限</span>
+                <span className="ml-1.5 align-baseline text-xs font-sans font-normal tracking-wide text-faint">上限</span>
               ) : null}
             </p>
           </div>
