@@ -207,8 +207,8 @@ export function ScoutApp() {
 
   return (
     <div className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-bg text-fg">
-      {tab === "search" ? <HomeWash faded /> : null}
-      <header className={cn("relative z-10 shrink-0 border-b border-border", tab === "search" ? "bg-bg/60 backdrop-blur-sm" : "bg-bg")}>
+      <HomeWash faded />
+      <header className="relative z-10 shrink-0 border-b border-border bg-bg/60 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-4 py-2.5 sm:px-6 sm:pb-3 sm:pt-5">
           <p className="hidden text-xs tracking-widest text-faint sm:block">EIKETSU TAISEN</p>
           <h1 className="font-display text-xl tracking-tight text-balance sm:text-3xl">英傑大戦⚡️速查</h1>
@@ -221,7 +221,7 @@ export function ScoutApp() {
         </nav>
       </header>
 
-      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
+      <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_30rem]">
         <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-border lg:border-r">
           {tab === "about" ? (
             <AboutPage />
