@@ -10,6 +10,7 @@ import {
   kokouTiers,
   konshinTiers,
   officialUrl,
+  schoolTiers,
   senkiTiers,
   shukuseiTiers,
   splitEffectValue,
@@ -18,6 +19,7 @@ import {
   type KokouTiers,
   type KonshinTier,
   type SenkiCol,
+  type SchoolCol,
   type ShukuseiTier,
   type SpecialBlock,
   type StatLine,
@@ -57,13 +59,14 @@ export function CardDetail({ card }: { card: Card }) {
   const shukusei = konshin || kokou ? null : shukuseiTiers(card);
   const useCount = konshin || kokou || shukusei ? null : useCountTiers(card);
   const senki = konshin || kokou || shukusei || useCount ? null : senkiTiers(card);
-  const effects = konshin || kokou || shukusei || useCount || senki ? [] : displayEffects(card);
+  const school = konshin || kokou || shukusei || useCount || senki ? null : schoolTiers(card);
+  const effects = konshin || kokou || shukusei || useCount || senki || school ? [] : displayEffects(card);
   const area = displayArea(card);
   const desc = displayMainStratDesc(card);
   const tankens = cardTanken(card);
-  const special = cardSpecial(card);
+  const special = school ? null : cardSpecial(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
-  const hasData = Boolean(konshin || kokou || shukusei || useCount || senki || effects.length || area || duration.label);
+  const hasData = Boolean(konshin || kokou || shukusei || useCount || senki || school || effects.length || area || duration.label);
 
   return (
     <div className="flex flex-col gap-3 pb-8">
@@ -101,6 +104,8 @@ export function CardDetail({ card }: { card: Card }) {
             <UseCountGrid tiers={useCount} />
           ) : senki ? (
             <SenkiGrid cols={senki} />
+          ) : school ? (
+            <SchoolGrid cols={school} />
           ) : effects.length ? (
             <EffectList rows={effects} />
           ) : null}
@@ -282,6 +287,26 @@ function UseCountGrid({ tiers }: { tiers: UseCountTier[] }) {
               ) : null}
             </div>
             <TierRows id={tier.id} rows={tier.rows} />
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SchoolGrid({ cols }: { cols: SchoolCol[] }) {
+  const byRyuha = cols.some((col) => /部隊|士氣|城塞|琥煌/.test(col.title));
+  return (
+    <div className="mt-4">
+      <p className="text-xs leading-relaxed text-pretty text-muted">
+        {byRyuha ? "依所選流派，效果完全不同。" : "依對象兵種，效果不同。"}
+      </p>
+      <div className="mt-2 flex flex-col gap-2">
+        {cols.map((col) => (
+          <section key={col.id} className="rounded-md bg-surface-2 px-2.5 py-2">
+            <h3 className="font-display text-sm leading-tight text-fg">{col.title}</h3>
+            {col.note ? <p className="mt-0.5 text-xs leading-relaxed text-pretty text-muted">{col.note}</p> : null}
+            <TierRows id={col.id} rows={col.rows} />
           </section>
         ))}
       </div>

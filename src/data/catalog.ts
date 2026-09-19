@@ -716,13 +716,16 @@ function pickMainDuration(card: Card): {
 }
 
 export function formatStratDuration(card: Card): StratDuration {
+  const hint = isKyotenCard(card)
+    ? "時長為據點上限。對手破壞據點會提早結束。波紋時長是據點放出的效果，不是計略時長。"
+    : stratTimeNote(card.stratTime);
+  if (hasPerSchoolDuration(card)) {
+    return { compact: "依流派", label: "依流派", seconds: "", dep: "", extra: "各流派時長見下列", hint, cap: false };
+  }
   const picked = pickMainDuration(card);
   const q = durQualifier(picked.note);
   const kyotenCap = picked.cap && isKyotenCard(card);
   const suffix = q;
-  const hint = kyotenCap
-    ? "時長為據點上限。對手破壞據點會提早結束。波紋時長是據點放出的效果，不是計略時長。"
-    : stratTimeNote(card.stratTime);
   if (picked.durC != null) {
     const core = formatCount(picked.durC);
     const label = suffix ? `${core} ${suffix}` : core;
@@ -1211,6 +1214,93 @@ export function senkiTiers(card: Card): SenkiCol[] | null {
     { id: "before", title: "戰器未解放", highlight: false, rows: effectRows(beforeFx, hide) },
     { id: "after", title: "戰器已解放", highlight: true, rows: effectRows(afterFx, hide) },
   ];
+}
+
+export type SchoolCol = {
+  id: string;
+  title: string;
+  note: string;
+  rows: StatLine[];
+};
+
+const SCHOOL_KEY = /^(部隊|士気|城塞|兵種|琥煌|騎兵|槍兵|弓兵)/;
+
+function hasPerSchoolDuration(card: Card): boolean {
+  if (!/選択した流派/.test(card.stratDesc ?? "")) return false;
+  return (card.effects ?? []).filter((effect) => effect.label.startsWith("効果時間") && /知力依存/.test(effect.value)).length >= 2;
+}
+
+function foldAttachedDurations(effects: CardEffect[]): CardEffect[] {
+  const out: CardEffect[] = [];
+  for (const effect of effects) {
+    const attached =
+      effect.label.startsWith("効果時間") &&
+      !/知力依存/.test(effect.value) &&
+      (/[:：]/.test(effect.value) || (/^[約\d]/.test(effect.value.trim()) && out.length > 0 && /[:：]/.test(out[out.length - 1]?.value ?? "")));
+    if (attached && out.length) {
+      const prev = out[out.length - 1];
+      out[out.length - 1] = { ...prev, value: `${prev.value} ${effect.value}` };
+      continue;
+    }
+    out.push(effect);
+  }
+  return out;
+}
+
+export function schoolTiers(card: Card): SchoolCol[] | null {
+  const branched = parseSpecialBranches(card.stratDesc ?? "");
+  if (branched.items.length < 2) return null;
+  if (!branched.items.every((item) => SCHOOL_KEY.test(item.key))) return null;
+
+  const hide = hasPerSchoolDuration(card) ? null : pickMainDurationEffect(card);
+  const body = foldAttachedDurations(
+    mainEffects(card).filter((effect) => {
+      if (hide && effect.label === hide.label && effect.value === hide.value) return false;
+      return true;
+    }),
+  );
+
+  let groups: CardEffect[][] | null = null;
+  const up = body.filter((effect) => effect.label === "武力上昇" || effect.label.startsWith("武力上昇"));
+  const down = body.filter((effect) => effect.label === "武力低下" || effect.label.startsWith("武力低下("));
+  if (up.length >= branched.items.length) groups = splitRepeatingGroups(body, up[0].label);
+  else if (down.length >= branched.items.length) groups = splitRepeatingGroups(body, down[0].label);
+
+  if (!groups || groups.length < branched.items.length) {
+    const shared = takeSenkiLabels(
+      body.filter((effect) => !effect.label.startsWith("効果時間")),
+      senkiClauseLabels(branched.main),
+    );
+    const unique = shared.rest.filter((effect) => !effect.label.startsWith("効果時間") && !isDurationEffectLabel(effect.label));
+    if (unique.length === branched.items.length) {
+      groups = unique.map((row) => [...shared.taken, row]);
+    }
+  }
+  if (!groups || groups.length < branched.items.length) return null;
+
+  if (hide) {
+    groups = groups.map((group) =>
+      group.filter((effect) => !(effect.label === hide.label && effect.value === hide.value)),
+    );
+  } else {
+    groups = groups.map((group) => {
+      if (group.length < 2) return group;
+      const last = group[group.length - 1];
+      if (last.label.startsWith("効果時間") && /自身が知力/.test(last.value)) return group.slice(0, -1);
+      return group;
+    });
+  }
+
+  const titles = branched.items.map((item) => translateLabel(item.key.replace(/[・･]/g, "／")));
+  if (groups.length === titles.length + 1) titles.push("琥煌");
+
+  const keepDur: CardEffect = hide ?? { label: "__dur__", value: "__dur__" };
+  return groups.slice(0, titles.length).map((group, i) => ({
+    id: titles[i] ?? String(i),
+    title: titles[i] ?? "其他",
+    note: i < branched.items.length ? translateDesc(branched.items[i].text) : "無追加效果",
+    rows: effectRows(group, keepDur),
+  }));
 }
 
 export function shukuseiTiers(card: Card): ShukuseiTier[] | null {
