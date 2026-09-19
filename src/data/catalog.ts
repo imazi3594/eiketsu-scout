@@ -86,6 +86,13 @@ export type KonshinTier = {
   rows: StatLine[];
 };
 
+export type ShukuseiTier = {
+  id: "star" | "normal";
+  title: string;
+  morale: number;
+  rows: StatLine[];
+};
+
 
 export type SkillDef = {
   id: number;
@@ -845,6 +852,65 @@ export function konshinTiers(card: Card): KonshinTier[] | null {
     { id: "strong", title: "強渾身", morale: `士氣 ${cost}`, rows: strongRows },
     { id: "weak", title: "弱渾身", morale: `士氣 ${cost + 1}`, rows: weakRows },
     { id: "none", title: "無渾身", morale: `士氣 ${cost + 2}+`, rows: noneRows },
+  ];
+}
+
+function parseMoraleMark(value: string): { abs: number } | { delta: number } | null {
+  const v = fullwidthNum(value).replace(/\s/g, "");
+  const delta = v.match(/^([+\-＋－])(\d+(?:\.\d+)?)$/);
+  if (delta) return { delta: (delta[1] === "-" || delta[1] === "－" ? -1 : 1) * Number(delta[2]) };
+  const abs = v.match(/^(\d+(?:\.\d+)?)$/);
+  if (abs) return { abs: Number(abs[1]) };
+  return null;
+}
+
+function isShukuseiStrat(card: Card): boolean {
+  return /宿星状態/.test(card.stratDesc ?? "");
+}
+
+export function shukuseiTiers(card: Card): ShukuseiTier[] | null {
+  if (!isShukuseiStrat(card)) return null;
+  const effects = card.effects ?? [];
+  const marks: { i: number; mark: { abs: number } | { delta: number } }[] = [];
+  effects.forEach((effect, i) => {
+    if (effect.label !== "必要士気") return;
+    const mark = parseMoraleMark(effect.value);
+    if (mark) marks.push({ i, mark });
+  });
+  if (!marks.length) return null;
+
+  const hide = pickMainDurationEffect(card);
+  const sliceRows = (from: number, to: number) =>
+    effectRows(
+      effects.slice(from, to).filter((effect) => effect.label !== "必要士気"),
+      hide,
+    );
+
+  let normalRows: StatLine[];
+  let starRows: StatLine[];
+  let moraleNormal = card.stratCost;
+  let moraleStar = card.stratCost;
+
+  if (marks.length >= 2) {
+    const [first, second] = marks;
+    normalRows = sliceRows(first.i + 1, second.i);
+    starRows = sliceRows(second.i + 1, effects.length);
+    moraleNormal = "abs" in first.mark ? first.mark.abs : card.stratCost + first.mark.delta;
+    moraleStar = "abs" in second.mark ? second.mark.abs : moraleNormal + second.mark.delta;
+  } else {
+    const { i, mark } = marks[0];
+    normalRows = sliceRows(0, i);
+    starRows = sliceRows(i + 1, effects.length);
+    moraleNormal = card.stratCost;
+    moraleStar = "abs" in mark ? mark.abs : card.stratCost + mark.delta;
+    if (!starRows.length) starRows = normalRows;
+  }
+
+  if (!normalRows.length && !starRows.length) return null;
+
+  return [
+    { id: "star", title: "宿星", morale: moraleStar, rows: starRows },
+    { id: "normal", title: "非宿星", morale: moraleNormal, rows: normalRows },
   ];
 }
 

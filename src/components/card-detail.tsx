@@ -9,10 +9,12 @@ import {
   kokouTiers,
   konshinTiers,
   officialUrl,
+  shukuseiTiers,
   splitEffectValue,
   type Card,
   type KokouTiers,
   type KonshinTier,
+  type ShukuseiTier,
   type StatLine,
   type Tanken,
 } from "@/data/catalog";
@@ -46,12 +48,13 @@ export function CardDetail({ card }: { card: Card }) {
   const duration = formatStratDuration(card);
   const konshin = konshinTiers(card);
   const kokou = konshin ? null : kokouTiers(card);
-  const effects = konshin || kokou ? [] : displayEffects(card);
+  const shukusei = konshin || kokou ? null : shukuseiTiers(card);
+  const effects = konshin || kokou || shukusei ? [] : displayEffects(card);
   const area = displayArea(card);
   const desc = displayMainStratDesc(card);
   const tankens = cardTanken(card);
   const meta = [duration.seconds, duration.dep, duration.extra].filter(Boolean);
-  const hasData = Boolean(konshin || kokou || effects.length || area || duration.label);
+  const hasData = Boolean(konshin || kokou || shukusei || effects.length || area || duration.label);
 
   return (
     <div className="flex flex-col gap-3 pb-8">
@@ -83,6 +86,8 @@ export function CardDetail({ card }: { card: Card }) {
             <KonshinGrid tiers={konshin} />
           ) : kokou ? (
             <KokouGrid data={kokou} />
+          ) : shukusei ? (
+            <ShukuseiGrid tiers={shukusei} />
           ) : effects.length ? (
             <EffectList rows={effects} />
           ) : null}
@@ -196,6 +201,38 @@ function KonshinGrid({ tiers }: { tiers: KonshinTier[] }) {
                 {tier.title}
               </h3>
               <p className="text-xs tabular-nums text-faint">{tier.morale}</p>
+            </div>
+            <TierRows id={tier.id} rows={tier.rows} />
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ShukuseiGrid({ tiers }: { tiers: ShukuseiTier[] }) {
+  return (
+    <div className="mt-4">
+      <p className="text-xs leading-relaxed text-pretty text-muted">進入宿星（槽 200%）時，效果同消耗士氣會改變。</p>
+      <div className="mt-2 flex flex-col gap-2">
+        {tiers.map((tier) => (
+          <section
+            key={tier.id}
+            className={cn("rounded-md px-2.5 py-2", tier.id === "star" ? "bg-faction-ko/30" : "bg-surface-2")}
+          >
+            <div className="flex items-baseline justify-between gap-2">
+              <h3
+                className={cn(
+                  "font-display text-sm leading-tight",
+                  tier.id === "star" ? "text-fg" : "text-muted",
+                )}
+              >
+                {tier.title}
+              </h3>
+              <span className="inline-flex shrink-0 items-baseline gap-1.5 whitespace-nowrap">
+                <span className="text-xs text-faint">消耗士氣</span>
+                <span className="font-display text-xl tabular-nums leading-none text-fg">{tier.morale}</span>
+              </span>
             </div>
             <TierRows id={tier.id} rows={tier.rows} />
           </section>
