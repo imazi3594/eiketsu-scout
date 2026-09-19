@@ -654,12 +654,15 @@ function parseDurationValue(value: string): { durC: number; depC: number | null 
   return { durC: Number(match[1]), depC: dep ? Number(dep[1]) : null };
 }
 
-function durationRank(effect: CardEffect, kyoten: boolean): number {
+function durationRank(effect: CardEffect, card: Card): number {
   const { label, value } = effect;
+  const kyoten = isKyotenCard(card);
   if (/^[+＋]/.test(value.trim())) return -1;
   if (/(撃破時|追加|攻城時)/.test(label)) return -1;
   if (/基本/.test(label)) return 100;
   if (kyoten && /最大/.test(label)) return 96;
+  const parsed = parseDurationValue(value);
+  if (card.durC != null && parsed && Math.abs(parsed.durC - card.durC) < 0.15) return 94;
   if (label === "効果時間" && /知力依存/.test(value)) return 90;
   if (/自身|味方/.test(label) && /知力依存/.test(value)) return 85;
   if (label === "効果時間") return 40;
@@ -669,15 +672,17 @@ function durationRank(effect: CardEffect, kyoten: boolean): number {
 }
 
 function pickMainDurationEffect(card: Card): CardEffect | null {
-  const kyoten = isKyotenCard(card);
   let best: CardEffect | null = null;
   let bestRank = -1;
+  let bestC = -1;
   for (const effect of mainEffects(card)) {
     if (!effect.label.startsWith("効果時間")) continue;
-    const rank = durationRank(effect, kyoten);
-    if (rank > bestRank) {
+    const rank = durationRank(effect, card);
+    const c = parseDurationValue(effect.value)?.durC ?? -1;
+    if (rank > bestRank || (rank === bestRank && c > bestC)) {
       best = effect;
       bestRank = rank;
+      bestC = c;
     }
   }
   return best;
@@ -771,6 +776,19 @@ export function formatStratDuration(card: Card): StratDuration {
   return { compact: translateValue(card.stratTime), label: translateValue(card.stratTime), seconds: "", dep: "", extra: "", hint, cap: kyotenCap };
 }
 
+function retagSecondaryDurations(effects: CardEffect[], hide: CardEffect | null): CardEffect[] {
+  return effects.map((effect, i, arr) => {
+    if (!effect.label.startsWith("効果時間")) return effect;
+    if (hide && effect.label === hide.label && effect.value === hide.value) return effect;
+    const prev = [...arr.slice(0, i)].reverse().find((row) => !row.label.startsWith("効果時間"));
+    if (!prev) return { ...effect, label: "追加効果時間" };
+    if (/速度低下/.test(prev.label)) return { ...effect, label: "速度低下時間" };
+    if (/武力低下/.test(prev.label)) return { ...effect, label: "武力低下時間" };
+    if (/知力低下/.test(prev.label)) return { ...effect, label: "知力低下時間" };
+    return { ...effect, label: "追加効果時間" };
+  });
+}
+
 export function displayEffects(card: Card): StatLine[] {
   const { rest } = peelSpecials(card);
   const { items } = parseSpecialBranches(card.stratDesc ?? "");
@@ -778,7 +796,8 @@ export function displayEffects(card: Card): StatLine[] {
     items.length >= 2
       ? rest.filter((effect) => effect.label !== "特殊効果" || !isBranchFragment(effect.value, items))
       : rest;
-  return effectRows(filtered, pickMainDurationEffect(card), rippleIntervalC(card));
+  const hide = pickMainDurationEffect(card);
+  return effectRows(retagSecondaryDurations(filtered, hide), hide, rippleIntervalC(card));
 }
 
 /** 紫勢力渾身：eiketsudb 由弱至強（無→弱→強），畫面由左至右 強｜弱｜無。 */
@@ -1321,6 +1340,11 @@ function peelSpecials(card: Card): { rest: CardEffect[]; specials: { text: strin
     }
     const nested: CardEffect[] = [];
     i += 1;
+    const nestStats = /陣形|設置|撤退時/.test(cur.value);
+    if (!nestStats) {
+      specials.push({ text: cur.value, nested });
+      continue;
+    }
     while (i < effects.length && effects[i].label !== "特殊効果") {
       const next = effects[i];
       if (hide && next.label === hide.label && next.value === hide.value) break;
