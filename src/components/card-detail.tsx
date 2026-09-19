@@ -325,11 +325,12 @@ function RecastGrid({ cols }: { cols: RecastCol[] }) {
 }
 
 function SchoolGrid({ cols }: { cols: SchoolCol[] }) {
-  const byRyuha = cols.some((col) => /部隊|士氣|城塞|琥煌/.test(col.title));
+  const byRyuha = cols.some((col) => /^(部隊|士氣|城塞|琥煌)$/.test(col.title));
+  const byTroop = cols.some((col) => /隊/.test(col.title) && !byRyuha);
   return (
     <div className="mt-4">
       <p className="text-xs leading-relaxed text-pretty text-muted">
-        {byRyuha ? "依所選流派，效果完全不同。" : "依對象兵種，效果不同。"}
+        {byRyuha ? "依所選流派，效果完全不同。" : byTroop ? "依對象部隊數，效果不同。" : "依對象兵種，效果不同。"}
       </p>
       <div className="mt-2 flex flex-col gap-2">
         {cols.map((col) => (

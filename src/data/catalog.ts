@@ -747,6 +747,9 @@ export function formatStratDuration(card: Card): StratDuration {
   if (hasPerSchoolDuration(card)) {
     return { compact: "依流派", label: "依流派", seconds: "", dep: "", extra: "各流派時長見下列", hint, cap: false };
   }
+  if (hasPerBranchDuration(card) && /部隊数/.test(card.stratDesc ?? "")) {
+    return { compact: "依部隊數", label: "依部隊數", seconds: "", dep: "", extra: "各隊數時長見下列", hint, cap: false };
+  }
   const picked = pickMainDuration(card);
   const q = durQualifier(picked.note);
   const kyotenCap = picked.cap && isKyotenCard(card);
@@ -1248,11 +1251,16 @@ export type SchoolCol = {
   rows: StatLine[];
 };
 
-const SCHOOL_KEY = /^(部隊|士気|城塞|兵種|琥煌|騎兵|槍兵|弓兵)/;
+const SCHOOL_KEY = /^(部隊|士気|城塞|兵種|琥煌|騎兵|槍兵|弓兵|[0-9０-９]+部隊|味方[≧＜]|敵[≧＜])/;
+
+function hasPerBranchDuration(card: Card): boolean {
+  const durs = (card.effects ?? []).filter((effect) => effect.label.startsWith("効果時間") && /知力依存/.test(effect.value));
+  if (durs.length < 2) return false;
+  return new Set(durs.map((effect) => effect.value.replace(/[▲▼↑↓\s]/g, ""))).size > 1;
+}
 
 function hasPerSchoolDuration(card: Card): boolean {
-  if (!/選択した流派/.test(card.stratDesc ?? "")) return false;
-  return (card.effects ?? []).filter((effect) => effect.label.startsWith("効果時間") && /知力依存/.test(effect.value)).length >= 2;
+  return /選択した流派/.test(card.stratDesc ?? "") && hasPerBranchDuration(card);
 }
 
 function foldAttachedDurations(effects: CardEffect[]): CardEffect[] {
@@ -1277,19 +1285,33 @@ export function schoolTiers(card: Card): SchoolCol[] | null {
   if (branched.items.length < 2) return null;
   if (!branched.items.every((item) => SCHOOL_KEY.test(item.key))) return null;
 
-  const hide = hasPerSchoolDuration(card) ? null : pickMainDurationEffect(card);
-  const body = foldAttachedDurations(
-    mainEffects(card).filter((effect) => {
-      if (hide && effect.label === hide.label && effect.value === hide.value) return false;
-      return true;
-    }),
-  );
+  if (branched.items.some((item) => item.text === "なし" || item.text === "無し")) return null;
+
+  const hide = hasPerBranchDuration(card) ? null : pickMainDurationEffect(card);
+  const body = foldAttachedDurations(mainEffects(card));
 
   let groups: CardEffect[][] | null = null;
+  const valueNeedles = branched.items.map((item) => {
+    if (/味方\s*≧\s*敵/.test(item.key)) return "味方部隊数≧敵部隊数";
+    if (/味方\s*＜\s*敵/.test(item.key)) return "味方部隊数＜敵部隊数";
+    return "";
+  });
+  if (valueNeedles.every(Boolean)) {
+    const buckets: CardEffect[][] = branched.items.map(() => []);
+    let cur = 0;
+    for (const effect of body) {
+      const hit = valueNeedles.findIndex((needle) => needle && effect.value.includes(needle));
+      if (hit >= 0) cur = hit;
+      buckets[cur].push(effect);
+    }
+    if (buckets.every((g) => g.length)) groups = buckets;
+  }
+
   const up = body.filter((effect) => effect.label === "武力上昇" || effect.label.startsWith("武力上昇"));
   const down = body.filter((effect) => effect.label === "武力低下" || effect.label.startsWith("武力低下("));
-  if (up.length >= branched.items.length) groups = splitRepeatingGroups(body, up[0].label);
-  else if (down.length >= branched.items.length) groups = splitRepeatingGroups(body, down[0].label);
+  const tagged = body.some((effect) => /味方部隊数[≧＜]|敵部隊数/.test(effect.value));
+  if (!groups && !tagged && up.length >= branched.items.length) groups = splitRepeatingGroups(body, up[0].label);
+  else if (!groups && !tagged && down.length >= branched.items.length) groups = splitRepeatingGroups(body, down[0].label);
 
   if (!groups || groups.length < branched.items.length) {
     const shared = takeSenkiLabels(
@@ -1300,6 +1322,22 @@ export function schoolTiers(card: Card): SchoolCol[] | null {
     if (unique.length === branched.items.length) {
       groups = unique.map((row) => [...shared.taken, row]);
     }
+  }
+  if (!groups || groups.length < branched.items.length) {
+    const durCuts: number[] = [];
+    body.forEach((effect, i) => {
+      if (effect.label.startsWith("効果時間") || isDurationEffectLabel(effect.label)) durCuts.push(i);
+    });
+    if (durCuts.length + 1 >= branched.items.length && durCuts.length >= 1) {
+      const cuts = [0, ...durCuts.map((i) => i + 1)].slice(0, branched.items.length);
+      groups = cuts.map((start, i) => body.slice(start, i + 1 < cuts.length ? cuts[i + 1] : body.length));
+    }
+  }
+  if (!groups || groups.length < branched.items.length) {
+    groups = splitByHeadingCues(
+      body.filter((effect) => !effect.label.startsWith("効果時間")),
+      branched.items,
+    );
   }
   if (!groups || groups.length < branched.items.length) return null;
 
@@ -1648,7 +1686,7 @@ function peelSpecials(card: Card): { rest: CardEffect[]; specials: { text: strin
   return { rest, specials };
 }
 
-const BRANCH_TRIGGER = /以下の効果|効果が変わる|以下に変化/;
+const BRANCH_TRIGGER = /以下の効果|効果が変わる|以下に変化|部隊数に応じて/;
 const BRANCH_SKIP = /^(?:短計|[0-9０-９]+消費)/;
 
 function parseBranchLine(line: string): { key: string; text: string } | null {
